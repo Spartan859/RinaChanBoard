@@ -20,4 +20,5 @@
     <string name="auto_send">自动发送</string>
     <string name="send">发送</string>
     <string name="stop">停止</string>
+    <string name="print_row_act">打印文字</string>
 </resources>

@@ -44,4 +44,12 @@
         android:textSize="16sp"
         android:text="@string/preset_live"
         android:layout_marginTop="10dp"/>
+
+    <Button
+        android:id="@+id/btn_print_activity"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/print_row_act"
+        android:textSize="16sp" />
 </LinearLayout>

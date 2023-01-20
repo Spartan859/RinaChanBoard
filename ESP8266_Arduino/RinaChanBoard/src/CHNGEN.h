@@ -1,0 +1,1 @@
+int GBK_to_node(unsigned char* wordx,bool output[][16]/*,unsigned char* O_code0x*/);

@@ -1,0 +1,16 @@
+{
+	"folders": [
+        {
+            "path": ".."
+        },
+        {
+            "name": "RinaChanBoard",
+            "path": "."
+        },
+        {
+            "name": "test_esp32",
+            "path": "../../../test_esp32"
+        }
+    ],
+    "settings": {}
+}

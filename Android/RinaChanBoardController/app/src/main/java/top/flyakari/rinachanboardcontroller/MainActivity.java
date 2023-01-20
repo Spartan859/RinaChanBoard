@@ -20,7 +20,7 @@ import top.flyakari.rinachanboardcontroller.udp.UdpClientConnector;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Button mBtnManual, mBtnLive, mBtnCheck;
+    private Button mBtnManual, mBtnLive, mBtnCheck, mBtnPrint;
     private TextView mTvReply;
     private EditText mEtIP;
     private UdpClientConnector mUdpClientConnector;
@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         mTvReply = findViewById(R.id.tv_reply1);
         mBtnManual = findViewById(R.id.btn_manual_activity);
         mBtnLive = findViewById(R.id.btn_live_activity);
+        mBtnPrint = findViewById(R.id.btn_print_activity);
         mBtnCheck = findViewById(R.id.btn_check);
         mEtIP = findViewById(R.id.et_ip);
     }
@@ -81,6 +82,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, PresetLiveActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        mBtnPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, PrintRowActivity.class);
                 startActivity(intent);
             }
         });
