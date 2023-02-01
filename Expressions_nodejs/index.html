@@ -28,13 +28,41 @@
 <div id="ctpanel">
     <!--button id="output_selected">输出指定区域亮灯编号</button><br-->
     <button id="select_area">选择区域</button><br>
-    <button id="output_area">输出区域</button><br>
+    <button id="output_area">输出区域到</button>
+    <input type="text" id="exp_category" value="类型"/>
+    <input type="text" id="exp_name" value="名字"/><br>
     <input type="file" id="import_csv"/><br>
     <button id="show_id">显示编号</button><br>
-    <button id="erase_area">清空区域</button>
+    <button id="erase_area">清空区域</button><br>
+    <button id="erase_all">清空所有</button>
+    <div>
+        <p>导入JSON</p>
+        <input type="file" id="import_json"/>
+    </div>
+    
 </div>
-<div id="output_area">
-    <input style="width: auto; height: auto;" type="text" id="results"/>
+<div>
+    <p>eye_left</p>
+    <div id="eye_left">
+
+    </div>
+    <p>eye_right</p>
+    <div id="eye_right">
+        
+    </div>
+    <p>cheek</p>
+    <div id="cheek">
+        
+    </div>
+    <p>mouth</p>
+    <div id="mouth">
+        
+    </div>
+</div>
+
+<div contenteditable="true" id="results">
+    <!--input style="width: auto; height: auto;" type="text" id="results"/-->
+    akdjaskl
 </div>
 
 <script type="text/javascript" src="scripts/script.js"></script>
