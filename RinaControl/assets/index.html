@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"> 
+    <title>RinaBoard Expressions</title>
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scripts/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@lyo/neat-csv"></script>
+    <style type="text/css">
+        .left{ float:left;width:27.86px;height:25.17px; border:1px solid #ccc;}
+        .p{color:green;font-size:5px;}
+    </style>
+</head>
+
+<div id="bigbox">
+    <div class="box1">
+        <div class="left" id="pixel_1"></div>
+        <div class="left"></div>
+        <div class="left"></div>
+        <div class="left"></div>
+        <div style="clear:both;"></div>
+    </div>
+    <div class="box2"><div class="left"></div><div class="left"></div><div class="left"></div><div class="left"></div><div style="clear:both;"></div></div>
+    <div class="box3"><div class="left"></div><div class="left"></div><div class="left"></div><div class="left"></div><div style="clear:both;"></div></div>
+    <div class="box4"><div class="left"></div><div class="left"></div><div class="left"></div><div class="left"></div><div style="clear:both;"></div></div>
+</div>
+<div id="ctpanel">
+    <!--button id="output_selected">输出指定区域亮灯编号</button><br-->
+    <button id="select_area">选择区域</button><br>
+    <button id="output_area">输出区域到</button>
+    <input type="text" id="exp_category" value="类型"/>
+    <input type="text" id="exp_name" value="名字"/><br>
+    <input type="file" id="import_csv"/><br>
+    <button id="show_id">显示编号</button><br>
+    <button id="erase_area">清空区域</button><br>
+    <button id="erase_all">清空所有</button>
+    <div>
+        <p>导入JSON</p>
+        <input type="file" id="import_json"/>
+    </div>
+    
+</div>
+<div>
+    <p>eye_left</p>
+    <div id="eye_left">
+
+    </div>
+    <p>eye_right</p>
+    <div id="eye_right">
+        
+    </div>
+    <p>cheek</p>
+    <div id="cheek">
+        
+    </div>
+    <p>mouth</p>
+    <div id="mouth">
+        
+    </div>
+</div>
+
+<div contenteditable="true" id="results">
+    <!--input style="width: auto; height: auto;" type="text" id="results"/-->
+    akdjaskl
+</div>
+
+<script type="text/javascript" src="scripts/script.js"></script>
