@@ -10,7 +10,8 @@
 #define SERVICE_UUID "85253ceb-b0b7-4cc2-8e81-c22affa36a43"
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
-#define LED_PIN 26
+//#define LED_PIN 26
+#define LED_PIN 12
 #define NUM_LEDS 270
 String ssid="Redmi K30i 5G",password="zteztezte";
 CRGB leds[NUM_LEDS];

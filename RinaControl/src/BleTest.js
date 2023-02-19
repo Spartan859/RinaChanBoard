@@ -18,6 +18,8 @@ const SERVICE_UUID='85253ceb-b0b7-4cc2-8e81-c22affa36a43';
 const MESSAGE_UUID='a1303310-cd55-4c46-8140-61b17f22bf01';
 const WIFI_UUID='586f7454-dc36-442b-8a87-7e5368a5c42a';
 
+
+
 const requestBLEPermission = async () => {
     try {
       const granted = await PermissionsAndroid.requestMultiple(
@@ -33,10 +35,10 @@ export default function BleTest(){
     const [connectedDevice, setConnectedDevice] = useState({});
     const [message, setMessage] = useState('Nothing Yet');
     //var wifiValue='ExampleSSID;ExamplePWD';
-    const [ssid,setSSID]=useState('Redmi K30i 5G');
-    const [pwd,setPWD]=useState('zteztezte');
-    getData('ssid').then((res)=>{if(res!=null) setSSID(res)});
-    getData('pwd').then((res)=>{if(res!=null) setPWD(res)});
+    const [ssid,setSSID]=useState(null);
+    const [pwd,setPWD]=useState(null);
+    getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
+    getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
 
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {

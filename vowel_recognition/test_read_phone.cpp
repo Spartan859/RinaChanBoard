@@ -11,8 +11,8 @@ string DICT="_AIUEONX";
 int seed=114514; 
 int ans[40005];int as;
 int cnt[10];
-int bq[8][15]={{0},{3,5,6,8},{2,9,14},{1,10},{1,7},{3,11,12,13},{4,1,2,3,4},{4,1,2,3,4}};
-int eyes[25]={9,1,2,3,4,5,6,7,11,12};
+int bq[8][15]={{0},{2,5,6},{1,9},{1,10},{1,7},{1,11},{4,1,2,3,4},{4,1,2,3,4}};
+int eyes[25]={9,-1,2,3,4,5,6,7,11,12};
 int fnans[40005],fn;
 inline void myAssert(bool x){
 	if(!x){
@@ -26,7 +26,7 @@ inline int randint(int up){
 int main(){
 	srand(seed);
 	ios::sync_with_stdio(0);
-	freopen("AnalogHeartBasic.txt","r",stdin); 
+	freopen("rina_pipo.txt","r",stdin); 
 	while(cin>>s){
 		if(s[0]-'0'>=0&&s[0]-'0'<=9){
 			double f=stod(s);
@@ -48,7 +48,7 @@ int main(){
 		ans[++as]=id-i;
 	}
 	//60fps to 10fps
-	freopen("AnalogHeartBasic_output_phone.txt","w",stdout);
+	freopen("rina_pipo_exp_list.txt","w",stdout);
 	int skp=6;
 	cout<<as<<endl;
 	for(int i=1;i<=as;i+=skp){
@@ -63,7 +63,7 @@ int main(){
 		cout<<DICT[id];
 	}
 	cout<<endl;
-	freopen("AnalogHeartBasic_output.txt","w",stdout);
+	freopen("rina_pipo_exp.txt","w",stdout);
 	for(int i=1;i<=fn;i++){
 		if(fnans[i]==fnans[i-1]) continue;
 		if(fnans[i]==7){
@@ -81,7 +81,7 @@ int main(){
 		int sizex=bq[fnans[i]][0];
 		int mouth=bq[fnans[i]][randint(sizex)];
 		int eyex=eyes[1];
-		cout<<frameid<<'!'<<eyex<<','<<eyex<<','<<mouth<<",0"<<endl;
+		cout<<frameid<<'!'<<eyex<<','<<eyex<<','<<mouth<<",-1"<<endl;
 	}
 	return 0;
 }

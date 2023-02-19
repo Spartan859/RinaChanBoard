@@ -16,6 +16,7 @@ import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
 import DropDownPicker from 'react-native-dropdown-picker';
 
+const FPS=10;
 var server="http://101.133.137.243:1101/";
 
 var board_ref;
@@ -68,7 +69,7 @@ async function DownloadExpTxt(){
         }
         ExpTxtListTmp[i]={label: FileList[i]['name'].split('.')[0],value: FileList[i]['name']};
     }
-    //console.log(ExpContent["田中千惠美 - Analogue Heart.mp3.txt"]['FrameList']);
+    console.log(ExpContent["田中千惠美 - Analogue Heart.mp3.txt"][0]);
 }
 
 
@@ -79,7 +80,7 @@ export default function AutoLive(){
     const [SongSel, setSongSel] = useState("田中千惠美 - Analogue Heart.mp3.txt");
     useEffect(()=>{if(ExpTxtList[0]==null) DownloadExpTxt().then(()=>{SetExpTxtList(ExpTxtListTmp);console.log(ExpTxtList)});})
     function progressMonitor(data){
-        var curFrame=data.currentTime*10;
+        var curFrame=data.currentTime*FPS;
         var nowFrame=ExpContent[SongSel]['FrameList'].findLast(element=>element<=curFrame);
         if(nowFrame==lastFrame) return;
         lastFrame=nowFrame;
@@ -90,7 +91,7 @@ export default function AutoLive(){
         
         for(var catName in exp_all){
             //console.log(catName);
-            
+            if(exp_nowFrame[exp_order[catName]]=='-1') continue;
             setExp(catName,exp_all[catName],0);
             exp_all[catName]=exp_nowFrame[exp_order[catName]];
             setExp(catName,exp_all[catName],1);

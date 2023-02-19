@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "ESP32_arduino",
+			"path": "."
+		}
+	],
+    "settings": {
+        "files.associations": {
+            "sstream": "cpp",
+            "*.tcc": "cpp",
+            "string": "cpp",
+            "string_view": "cpp"
+        }
+    }
+}
