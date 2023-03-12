@@ -4,7 +4,7 @@ import { NetworkInfo } from "react-native-network-info";
 import base64 from 'react-native-base64'
 import { BleManager, Device } from "react-native-ble-plx";
 import { PermissionsAndroid, Text, TextInput, TouchableOpacity, View,Button,Alert } from "react-native";
-import { styles } from "./InitScreen";
+import { styles } from "./Styles"
 import { sendInit } from "./InitScreen";
 import { sleep } from "./InitScreen";
 import { ipa_out } from "./InitScreen";

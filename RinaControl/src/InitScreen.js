@@ -31,46 +31,10 @@ socket.on('message', function(msg, rinfo) {
     ipa_out=buffer2str(msg);
     storeData('ipa_out',ipa_out);
     console.log('Message received', ipa_out);
+    Alert.alert('Message received', ipa_out);
 })
 
 export {socket};
-
-export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        //paddingHorizontal: 10
-    },
-    webview_container:{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        //height: 10
-    },
-    bigBlue: {
-      color: 'blue',
-      fontWeight: 'bold',
-      fontSize: 30,
-    },
-    red: {
-      color: 'red',
-    },
-    button: {
-        alignItems: "center",
-        backgroundColor: "#DDDDDD",
-        padding: 10,
-        margin: 10
-    },
-    horizontal_scroll: {
-        flex: 1,
-        //height: 20
-    },
-    image_in_scroll: {
-        height: 90,
-        resizeMode: 'contain'
-    }
-  });
 
 export var ipa_out='null';
 getData('ipa_out').then((res)=>{if(res!=null) ipa_out=res});

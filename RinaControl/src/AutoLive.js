@@ -9,9 +9,9 @@ import {InitScreen} from './src/InitScreen'
 import {getLocalExpFile} from './src/InitScreen'
 import { sendUdpDefault } from "./InitScreen";
 import CheckBox from "@react-native-community/checkbox";
-import { styles } from "./InitScreen";
-import { id_to_coordinate } from "../App";
-import { exp_matrix } from "../App";
+import { styles } from "./Styles";
+import { id_to_coordinate } from "./ManualScreen";
+import { exp_matrix } from "./ManualScreen";
 import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -80,6 +80,7 @@ export default function AutoLive(){
     const [SongSel, setSongSel] = useState("田中千惠美 - Analogue Heart.mp3.txt");
     useEffect(()=>{if(ExpTxtList[0]==null) DownloadExpTxt().then(()=>{SetExpTxtList(ExpTxtListTmp);console.log(ExpTxtList)});})
     function progressMonitor(data){
+        console.log(data.currentTime);
         var curFrame=data.currentTime*FPS;
         var nowFrame=ExpContent[SongSel]['FrameList'].findLast(element=>element<=curFrame);
         if(nowFrame==lastFrame) return;
@@ -126,10 +127,20 @@ export default function AutoLive(){
             <View style={{flex:0.5,zIndex:1}}>
                 <VideoPlayer 
                 source={{uri: "http://101.133.137.243:1101/"+SongSel.substring(0,SongSel.length-4)}}
-                ref={(ref)=>{music_player_ref=ref}}
+                ref={(ref)=>{this.player=ref}}
                 onProgress={progressMonitor}
                 progressUpdateInterval={20}
                 paused={true}
+                /*
+                playWhenInactive={true}
+                playInBackground={true}
+                onLoad={() => {
+                    console.log(this.player.player);
+                    this.player.player.setNativeProps({
+                      useExternalPlaybackWhileExternalScreenIsActive: false
+                    });
+                }}*/
+                ignoreSilentSwitch={"ignore"}
                 />
             </View>   
         </View>
