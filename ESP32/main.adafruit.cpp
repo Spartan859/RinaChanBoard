@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <FastLED.h>
+#include <Adafruit_NeoPixel.h>
 #include <WiFi.h>
 #include <AsyncUDP.h>
 #include <WiFiUdp.h>
@@ -12,9 +12,9 @@
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
 #define LED_PIN 26
 //#define LED_PIN 12
-#define NUM_LEDS 269
+#define NUM_LEDS 270
 String ssid="Redmi K30i 5G",password="zteztezte";
-CRGB leds[NUM_LEDS];
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(270, LED_PIN, NEO_GRB + NEO_KHZ800);//初始化2812
 
 AsyncUDP Udp;
 WiFiUDP UDP2;
@@ -69,8 +69,8 @@ int exp_now[4]={1,1,1,1};
 String catNameList[4]={"eye_left","eye_right","cheek","mouth"};
 
 void setPixel(int pixelId,int tp){
-    if(tp) leds[pixelId]=CRGB(255,0,255);
-    else leds[pixelId]=CRGB::Black;
+    if(tp) pixels.setPixelColor(pixelId,pixels.Color(255,0,255));
+    else pixels.setPixelColor(pixelId,pixels.Color(0,0,0));
 }
 
 void setFace(String catName,int expid,int tp){
@@ -151,7 +151,7 @@ void StartWifi(){
 }
 
 void StartBLE(){
-    BLEDevice::init("RinaChanBoard2");
+    BLEDevice::init("RinaChanBoard");
     pServer=BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
     BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -180,16 +180,19 @@ void StartBLE(){
 }
 void setup() {
     //
-    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(10);
+    pixels.begin();
+    pixels.setBrightness(40);
     
-    for(int i=0;i<NUM_LEDS;i++){
+    for(int i=0;i<269;i++){
         setPixel(i,1);
-        FastLED.show();
-        delay(20);
-        setPixel(i,0);
+        pixels.show();
+        delay(40);
     }
-    FastLED.show();
+    for(int i=0;i<269;i++){
+        setPixel(i,0);
+        pixels.show();
+        delay(40);
+    }
     //Connect to Wifi
     {
     Serial.begin(9600);
@@ -211,7 +214,7 @@ void loop() {
             int n=UDP2.read(buf,packetSize);
             buf[n]='\0';
             Serial.println("Received: ");
-            Serial.println(buf[0]);
+            //Serial.println(buf[0]);
             if(buf[0]=='A'){
                 String tmpadd=buf+1;
                 //Serial.println(tmpadd);
@@ -219,16 +222,17 @@ void loop() {
                 //Serial.println(expTxt);
             }else if(buf[0]=='B'){
                 deserializeJson(expJSON,expTxt);
-                //Serial.println(expTxt);
+                Serial.println(expTxt);
                 if((int)expJSON["mouth"][2][2]>0){
                     for(int i=0;i<4;i++){
                         setFace(catNameList[i],exp_now[i],1);
                     }
-                    FastLED.show();
+                    pixels.show();
                 }
             }else if(buf[0]=='C'){
                 expTxt="";
             }else if(buf[0]=='e'){
+                Serial.println(buf);
                 for(int i=0;i<4;i++){
                     setFace(catNameList[i],exp_now[i],0);
                 }
@@ -236,7 +240,7 @@ void loop() {
                 for(int i=0;i<4;i++){
                     setFace(catNameList[i],exp_now[i],1);
                 }
-                FastLED.show();
+                pixels.show();
             }
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);

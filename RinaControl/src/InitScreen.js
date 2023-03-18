@@ -58,6 +58,7 @@ export const sendUdpDefault=(msg)=>{
 export const sendInit= async() => {
     //sendUdpString("test",sendto_port,ipa);
     //console.log(getLocalExpFile());
+    console.log("Sending Init!!!!!!!!!!!!!!");
     let str=await getLocalExpFile();
     var yz=1400;
     sendUdpDefault('C');

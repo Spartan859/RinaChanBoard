@@ -15,8 +15,9 @@ import { storeData,getData } from "./LocalDataStorage";
 const BLTManager=new BleManager();
 
 const SERVICE_UUID='85253ceb-b0b7-4cc2-8e81-c22affa36a43';
-const MESSAGE_UUID='a1303310-cd55-4c46-8140-61b17f22bf01';
 const WIFI_UUID='586f7454-dc36-442b-8a87-7e5368a5c42a';
+const MESSAGE_UUID='a1303310-cd55-4c46-8140-61b17f22bf01';
+
 
 
 
@@ -43,73 +44,83 @@ export default function BleTest(){
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {
         console.log('connecting to Device:', device.name);
-        device
-            .connect()
-            .then(device => {
-                setConnectedDevice(device);
-                setIsConnected(true);
-                return device.discoverAllServicesAndCharacteristics();
-            })
-            .then(device => {
-                //  Set what to do when DC is detected
-                BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-                    console.log('Device DC');
-                    setIsConnected(false);
-                });
-
-                //Read inital values
-
-                //Message
-                device
-                    .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
-                    .then(valenc => {
-                        setMessage(base64.decode(valenc.value));
-                    });
-
-                //WifiValue
-                /*
-                device
-                    .readCharacteristicForService(SERVICE_UUID, WIFI_UUID)
-                    .then(valenc => {
-                        setWifiValue(base64.decode(valenc.value));
-                    });*/
-
-                //monitor values and tell what to do when receiving an update
-
-                //Message
-                device.monitorCharacteristicForService(
-                    SERVICE_UUID,
-                    MESSAGE_UUID,
-                    (error, characteristic) => {
-                        if (characteristic.value != null) {
-                            setMessage(base64.decode(characteristic.value));
-                            console.log(
-                                'Message update received: ',
-                                base64.decode(characteristic.value),
-                            );
-                        }
-                    },
-                    'messagetransaction',
-                );
-
-                //WifiValue
-                /*
-                device.monitorCharacteristicForService(
-                    SERVICE_UUID,
-                    WIFI_UUID,
-                    (error, characteristic) => {
-                        if (characteristic.value != null) {
-                            setWifiValue(base64.decode(characteristic.value));
-                            console.log(
-                                'WIFI Value update received: ',
-                                base64.decode(characteristic.value),
-                            );
-                        }
-                    },
-                    'wifitransaction',
-                );*/
-                console.log('Connection established');
+        //BLTManager.enableAutoConnect(device.id,true);
+        BLTManager.connectToDevice(device.id,{autoConnect: true}).then(device=>{
+            console.log('connected to device!');
+            setConnectedDevice(device);
+            setIsConnected(true);
+            return device.discoverAllServicesAndCharacteristics();
+        }).then(device=>{
+            BLTManager.onDeviceDisconnected(device.id, (error, device) => {
+                console.log('Device DC');
+                setIsConnected(false);
             });
+            //Message
+            device
+                .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
+                .then(valenc => {
+                    setMessage(base64.decode(valenc.value));
+                });
+            //Message
+            device.monitorCharacteristicForService(
+                SERVICE_UUID,
+                MESSAGE_UUID,
+                (error, characteristic) => {
+                    if (characteristic.value != null) {
+                        setMessage(base64.decode(characteristic.value));
+                        console.log(
+                            'Message update received: ',
+                            base64.decode(characteristic.value),
+                        );
+                    }
+                },
+                'messagetransaction',
+            );
+            console.log('Connection established');
+        }).catch((error)=>{
+            console.log('Error connecting to device: '+error);
+        });
+        // device
+        //     .connect()
+        //     .then(device => {
+        //         setConnectedDevice(device);
+        //         setIsConnected(true);
+        //         return device.discoverAllServicesAndCharacteristics();
+        //     })
+        //     .then(device => {
+        //         //  Set what to do when DC is detected
+        //         BLTManager.onDeviceDisconnected(device.id, (error, device) => {
+        //             console.log('Device DC');
+        //             setIsConnected(false);
+        //         });
+
+        //         //Read inital values
+
+        //         //Message
+        //         device
+        //             .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
+        //             .then(valenc => {
+        //                 setMessage(base64.decode(valenc.value));
+        //             });
+
+        //         //Message
+        //         device.monitorCharacteristicForService(
+        //             SERVICE_UUID,
+        //             MESSAGE_UUID,
+        //             (error, characteristic) => {
+        //                 if (characteristic.value != null) {
+        //                     setMessage(base64.decode(characteristic.value));
+        //                     console.log(
+        //                         'Message update received: ',
+        //                         base64.decode(characteristic.value),
+        //                     );
+        //                 }
+        //             },
+        //             'messagetransaction',
+        //         );
+        //       
+        //         console.log('Connection established');
+        //     });
     }
 
     async function scanDevices(){
@@ -117,9 +128,15 @@ export default function BleTest(){
         console.log("scanning");
         BLTManager.startDeviceScan(null,null,(err,scannedDevice)=>{
             if(err) console.warn(err);
-            if(scannedDevice && scannedDevice.name=="RinaChanBoard"){
+            if(scannedDevice){
+                console.log('Scanned: '+scannedDevice.name);
+            }
+            if(scannedDevice && scannedDevice.name=="RinaChanBoard2"){
                 BLTManager.stopDeviceScan();
                 connectDevice(scannedDevice);
+                //connectDevice(scannedDevice);
+                //connectDevice(scannedDevice);
+                //connectDevice(scannedDevice);
             }
         })
         setTimeout(() => {
@@ -214,6 +231,16 @@ export default function BleTest(){
                 }}
                 id="sendWifi">
                 <Text style={{fontSize:30}}>发送Wifi信息</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={async()=>{ 
+                    storeData('ssid',ssid);
+                    storeData('pwd',pwd);
+                    prepareInit();
+                }}
+                id="sendWifi_only">
+                <Text style={{fontSize:30}}>发送配置文件</Text>
             </TouchableOpacity>
         </View>
     );

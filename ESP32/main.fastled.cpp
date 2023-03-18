@@ -12,7 +12,7 @@
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
 #define LED_PIN 26
 //#define LED_PIN 12
-#define NUM_LEDS 269
+#define NUM_LEDS 270
 String ssid="Redmi K30i 5G",password="zteztezte";
 CRGB leds[NUM_LEDS];
 
@@ -151,7 +151,7 @@ void StartWifi(){
 }
 
 void StartBLE(){
-    BLEDevice::init("RinaChanBoard2");
+    BLEDevice::init("RinaChanBoard");
     pServer=BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
     BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -182,14 +182,12 @@ void setup() {
     //
     FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(10);
-    
-    for(int i=0;i<NUM_LEDS;i++){
+    /*
+    for(int i=0;i<270;i++){
         setPixel(i,1);
         FastLED.show();
-        delay(20);
         setPixel(i,0);
-    }
-    FastLED.show();
+    }*/
     //Connect to Wifi
     {
     Serial.begin(9600);
@@ -211,7 +209,7 @@ void loop() {
             int n=UDP2.read(buf,packetSize);
             buf[n]='\0';
             Serial.println("Received: ");
-            Serial.println(buf[0]);
+            //Serial.println(buf[0]);
             if(buf[0]=='A'){
                 String tmpadd=buf+1;
                 //Serial.println(tmpadd);
@@ -219,7 +217,7 @@ void loop() {
                 //Serial.println(expTxt);
             }else if(buf[0]=='B'){
                 deserializeJson(expJSON,expTxt);
-                //Serial.println(expTxt);
+                Serial.println(expTxt);
                 if((int)expJSON["mouth"][2][2]>0){
                     for(int i=0;i<4;i++){
                         setFace(catNameList[i],exp_now[i],1);
