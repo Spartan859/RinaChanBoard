@@ -1,18 +1,10 @@
-import React, { Component, useEffect, useState } from "react";
-import {Text,TextInput,StyleSheet,TouchableOpacity,View, Alert,PermissionsAndroid, Dimensions, ScrollView, Image, Button} from 'react-native';
-import dgram from 'react-native-udp'
-import RNFS from 'react-native-fs'
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import React, {useEffect, useState } from "react";
+import {View,Dimensions} from 'react-native';
 import {WebView} from 'react-native-webview'
-import {InitScreen} from './src/InitScreen'
-import {getLocalExpFile} from './src/InitScreen'
 import { sendUdpDefault } from "./InitScreen";
-import CheckBox from "@react-native-community/checkbox";
 import { styles } from "./Styles";
-import { id_to_coordinate } from "./ManualScreen";
-import { exp_matrix } from "./ManualScreen";
-import Video from 'react-native-video';
+import ExpWebview from "./ExpWebview";
+import { setExp } from "./ExpWebview";
 import VideoPlayer from 'react-native-video-controls';
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -28,19 +20,6 @@ function getExpSendStr(){
     return exp_all['eye_left'].toString()+','+exp_all['eye_right'].toString()
     +','+exp_all['cheek'].toString()
     +','+exp_all['mouth'].toString()+',';
-}
-
-function setPixel(x,y,tp){
-    var run="setPixel("+x.toString()+','+y.toString()+','+tp.toString()+')';
-    board_ref.injectJavaScript(run);
-}
-
-function setExp(catName,expId,tp){
-    //console.log(exp_matrix[catName][expId])
-    for(var i in exp_matrix[catName][expId]){
-        pixel_id=exp_matrix[catName][expId][i];
-        setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
-    }
 }
 //var currentTime=0;
 var music_player_ref;
@@ -74,7 +53,6 @@ async function DownloadExpTxt(){
 
 
 export default function AutoLive(){
-    const screen = Dimensions.get("screen");
     const [ExpTxtList,SetExpTxtList]=useState([]);
     const [openSongSel, setOpenSongSel] = useState(false);
     const [SongSel, setSongSel] = useState("田中千惠美 - Analogue Heart.mp3.txt");
@@ -103,14 +81,7 @@ export default function AutoLive(){
     return(
         <View style={styles.container}>
             <View style={{flex:0.86}}>
-                <WebView
-                    ref={(r) => (board_ref = r)}
-                    style={{
-                        flex: 1,
-                        width: screen.width,
-                    }}
-                    source={{uri: 'https://bing.satintin.com/rina.html'}}
-                />
+                {ExpWebview()}
             </View>
             <View style={[styles.container,{flex:0.5,zIndex:2}]}>
                 <DropDownPicker

@@ -4,6 +4,8 @@ import {WebView} from 'react-native-webview'
 import { sendUdpDefault } from "./InitScreen";
 import CheckBox from "@react-native-community/checkbox";
 import { styles } from "./Styles";
+import { setExp } from "./ExpWebview";
+import ExpWebview from "./ExpWebview";
 
 var board_ref;
 export var id_matrix=require('../assets/RinaInit.json');
@@ -23,11 +25,6 @@ function getExpSendStr(){
     +','+exp_all['cheek'].toString()
     +','+exp_all['mouth'].toString()+',';
 }
-
-function setPixel(x,y,tp){
-    var run="setPixel("+x.toString()+','+y.toString()+','+tp.toString()+')';
-    board_ref.injectJavaScript(run);
-}
 /*
 function InitExp(){
     
@@ -35,13 +32,6 @@ function InitExp(){
     //exp_matrix=JSON.parse(ExpFile);
     exp_matrix=require('../assets/expressions.json');
 }*/
-function setExp(catName,expId,tp){
-    //console.log(exp_matrix[catName][expId])
-    for(var i in exp_matrix[catName][expId]){
-        pixel_id=exp_matrix[catName][expId][i];
-        setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
-    }
-}
 
 function randomNum(minNum,maxNum){ 
     switch(arguments.length){ 
@@ -125,8 +115,6 @@ export default function ManualScreen(){
         );
     }
     //console.log(require('./assets/index.html'))
-    const window = Dimensions.get("window");
-    const screen = Dimensions.get("screen");
     
     item_list={};
     function InitItemList() {
@@ -141,14 +129,7 @@ export default function ManualScreen(){
     return(
         <View style={styles.container}>
             <View style={{flex:0.86}}>
-            <WebView
-                ref={(r) => (board_ref = r)}
-                style={{
-                    flex: 1,
-                    width: screen.width,
-                }}
-                source={{uri: 'https://bing.satintin.com/rina.html'}}
-            />
+                {ExpWebview()}
             </View>
             
             <View style={{flex:1}}>
