@@ -17,8 +17,6 @@ export function setExp(catName,expId,tp){
         setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
     }
 }
-
-const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
 
 export default function ExpWebview(){

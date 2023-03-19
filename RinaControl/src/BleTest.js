@@ -131,7 +131,7 @@ export default function BleTest(){
             if(scannedDevice){
                 console.log('Scanned: '+scannedDevice.name);
             }
-            if(scannedDevice && scannedDevice.name=="RinaChanBoard2"){
+            if(scannedDevice && scannedDevice.name=="RinaChanBoard"){
                 BLTManager.stopDeviceScan();
                 connectDevice(scannedDevice);
                 //connectDevice(scannedDevice);
