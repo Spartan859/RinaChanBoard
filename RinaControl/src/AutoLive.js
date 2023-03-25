@@ -60,7 +60,7 @@ export default function AutoLive(){
     const [SongSel, setSongSel] = useState("田中千惠美 - Analogue Heart.mp3.txt");
     useEffect(()=>{if(ExpTxtList[0]==null) DownloadExpTxt().then(()=>{SetExpTxtList(ExpTxtListTmp);console.log(ExpTxtList)});})
     function progressMonitor(data){
-        console.log(data.currentTime);
+        //console.log(data.currentTime);
         var curFrame=data.currentTime*FPS;
         var nowFrame=ExpContent[SongSel]['FrameList'].findLast(element=>element<=curFrame);
         if(nowFrame==lastFrame) return;
@@ -76,6 +76,7 @@ export default function AutoLive(){
             setExp(catName,exp_all[catName],0);
             exp_all[catName]=exp_nowFrame[exp_order[catName]];
             setExp(catName,exp_all[catName],1);
+            //if(catName=='cheek') console.log(exp_all[catName]);
         }
         sendUdpDefault('e'+getExpSendStr())
         //console.log(nextframe);
