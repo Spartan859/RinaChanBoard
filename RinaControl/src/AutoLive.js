@@ -1,17 +1,14 @@
-import React, {useEffect, useState } from "react";
+import React, {useEffect, useState,createRef} from "react";
 import {View,Dimensions} from 'react-native';
 import {WebView} from 'react-native-webview'
 import { sendUdpDefault } from "./InitScreen";
 import { styles } from "./Styles";
 import ExpWebview from "./ExpWebview";
-import { setExp } from "./ExpWebview";
 import VideoPlayer from 'react-native-video-controls';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 const FPS=10;
 var server="http://101.133.137.243:1101/";
-
-var board_ref;
 
 var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0};
 const exp_order={"eye_left":0,"eye_right":1,"cheek":3,"mouth":2};
@@ -51,6 +48,11 @@ async function DownloadExpTxt(){
     console.log(ExpContent["田中千惠美 - Analogue Heart.mp3.txt"][0]);
 }
 
+const setExp_ref=createRef();
+function setExp(catName,expId,tp){
+    setExp_ref.current.setExp(catName,expId,tp);
+    //console.log(setExp_ref);
+}
 
 export default function AutoLive(){
     const [ExpTxtList,SetExpTxtList]=useState([]);
@@ -81,7 +83,7 @@ export default function AutoLive(){
     return(
         <View style={styles.container}>
             <View style={{flex:0.86}}>
-                {ExpWebview()}
+                <ExpWebview ref={setExp_ref}/>
             </View>
             <View style={[styles.container,{flex:0.5,zIndex:2}]}>
                 <DropDownPicker

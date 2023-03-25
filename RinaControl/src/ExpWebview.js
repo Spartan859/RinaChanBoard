@@ -1,28 +1,34 @@
-import React, {useEffect, useState } from "react";
+import React, {forwardRef, useEffect, useImperativeHandle, useState,useRef } from "react";
 import {View,Dimensions} from 'react-native';
 import {WebView} from 'react-native-webview'
 import { styles } from "./Styles";
 import { id_to_coordinate } from "./ManualScreen";
 import { exp_matrix } from "./ManualScreen";
 
-function setPixel(x,y,tp){
-    var run="setPixel("+x.toString()+','+y.toString()+','+tp.toString()+')';
-    board_ref.injectJavaScript(run);
-}
 
-export function setExp(catName,expId,tp){
-    //console.log(exp_matrix[catName][expId])
-    for(var i in exp_matrix[catName][expId]){
-        pixel_id=exp_matrix[catName][expId][i];
-        setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
-    }
-}
+
+
 const screen = Dimensions.get("screen");
 
-export default function ExpWebview(){
+const ExpWebview=forwardRef((props,ref)=>{
+    const board_ref=useRef(null);
+    function setPixel(x,y,tp){
+        var run="setPixel("+x.toString()+','+y.toString()+','+tp.toString()+')';
+        board_ref.current.injectJavaScript(run);
+    }
+    const setExp=(catName,expId,tp)=>{
+        //console.log(exp_matrix[catName][expId])
+        for(var i in exp_matrix[catName][expId]){
+            pixel_id=exp_matrix[catName][expId][i];
+            setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
+        }
+    }
+    useImperativeHandle(ref,()=>({
+        setExp,
+    }));
     return (
         <WebView
-            ref={(r) => (board_ref = r)}
+            ref={board_ref}
             style={{
                 flex: 1,
                 width: screen.width,
@@ -135,4 +141,6 @@ export default function ExpWebview(){
             `}}
         />
     );
-}
+});
+
+export default ExpWebview;

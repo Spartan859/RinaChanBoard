@@ -1,13 +1,11 @@
-import React from "react";
+import React, { createRef } from "react";
 import {Text,StyleSheet,TouchableOpacity,View, Alert, Dimensions, ScrollView, Image, Button} from 'react-native';
 import {WebView} from 'react-native-webview'
 import { sendUdpDefault } from "./InitScreen";
 import CheckBox from "@react-native-community/checkbox";
 import { styles } from "./Styles";
-import { setExp } from "./ExpWebview";
 import ExpWebview from "./ExpWebview";
 
-var board_ref;
 export var id_matrix=require('../assets/RinaInit.json');
 export var id_to_coordinate=[[],[]];
 export var exp_matrix=require('../assets/expressions.json');
@@ -24,6 +22,12 @@ function getExpSendStr(){
     return exp_all['eye_left'].toString()+','+exp_all['eye_right'].toString()
     +','+exp_all['cheek'].toString()
     +','+exp_all['mouth'].toString()+',';
+}
+
+const setExp_ref=createRef();
+function setExp(catName,expId,tp){
+    setExp_ref.current.setExp(catName,expId,tp);
+    //console.log(setExp_ref);
 }
 /*
 function InitExp(){
@@ -129,7 +133,7 @@ export default function ManualScreen(){
     return(
         <View style={styles.container}>
             <View style={{flex:0.86}}>
-                {ExpWebview()}
+                <ExpWebview ref={setExp_ref}/>
             </View>
             
             <View style={{flex:1}}>
