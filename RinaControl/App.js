@@ -44,9 +44,23 @@ RNFS.exists(ScreenHtmlPath).then((value)=>{//若本地不存在，则调用创�
 const Tab=createBottomTabNavigator();
 function AllTabs(){
     return (
-        <Tab.Navigator>
-            <Tab.Screen name="BleTest" component={BleTest}/>
-            <Tab.Screen name="Manual" component={ManualScreen}/> 
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    if(route.name=="配网"){
+                        return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>天</Text>;
+                    }
+                    if(route.name=="手动"){
+                        return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>王</Text>;
+                    }
+                    if(route.name=="Live"){
+                        return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>寺</Text>;
+                    }
+                },
+            })}
+        >
+            <Tab.Screen name="配网" component={BleTest}/>
+            <Tab.Screen name="手动" component={ManualScreen}/> 
             <Tab.Screen name="Live" component={AutoLive}/> 
         </Tab.Navigator>
     );
