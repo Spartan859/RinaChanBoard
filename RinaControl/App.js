@@ -4,7 +4,7 @@ import RNFS from 'react-native-fs'
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {WebView} from 'react-native-webview'
-import { sendUdpDefault } from "./src/InitScreen";
+import { sendUdpDefault } from "./src/BasicFuntions";
 import CheckBox from "@react-native-community/checkbox";
 import BleTest from "./src/BleTest";
 import AutoLive from "./src/AutoLive";

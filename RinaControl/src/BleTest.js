@@ -5,10 +5,11 @@ import base64 from 'react-native-base64'
 import { BleManager, Device } from "react-native-ble-plx";
 import { PermissionsAndroid, Text, TextInput, TouchableOpacity, View,Button,Alert } from "react-native";
 import { styles } from "./Styles"
-import { sendInit } from "./InitScreen";
-import { sleep } from "./InitScreen";
-import { ipa_out } from "./InitScreen";
-import { resetipa } from "./InitScreen";
+import { sendInit } from "./BasicFuntions";
+import { sendUdpDefault } from "./BasicFuntions";
+import { sleep } from "./BasicFuntions";
+import { ipa_out } from "./BasicFuntions";
+import { resetipa } from "./BasicFuntions";
 
 import { storeData,getData } from "./LocalDataStorage";
 
@@ -38,6 +39,7 @@ export default function BleTest(){
     //var wifiValue='ExampleSSID;ExamplePWD';
     const [ssid,setSSID]=useState(null);
     const [pwd,setPWD]=useState(null);
+    const [updateVersion,setUpdateVersion]=useState("0.0.2");
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
 
@@ -241,6 +243,26 @@ export default function BleTest(){
                 }}
                 id="sendWifi_only">
                 <Text style={{fontSize:30}}>发送配置文件</Text>
+            </TouchableOpacity>
+            <TextInput
+                style={{ height: 50, width: 200,borderColor: 'gray', borderWidth: 1 }}
+                onChangeText={val => setUpdateVersion(val)}
+                value={updateVersion}
+            />
+            <TouchableOpacity
+                style={styles.button}
+                onPress={async()=>{ 
+                    Alert.alert(
+                        "警告",
+                        "确认更新固件至版本"+updateVersion+'?',
+                        [
+                            {text:'确认',onPress:()=>{sendUdpDefault("U "+updateVersion+'.bin');}},
+                            {text:'取消',style: 'cancel'},
+                        ],
+                    );  
+                }}
+                id="SendUpdateCommand">
+                <Text style={{fontSize:30}}>发送固件更新指令</Text>
             </TouchableOpacity>
         </View>
     );

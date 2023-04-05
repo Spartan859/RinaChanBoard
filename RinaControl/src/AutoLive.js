@@ -1,7 +1,7 @@
 import React, {useEffect, useState,createRef} from "react";
 import {View,Dimensions} from 'react-native';
 import {WebView} from 'react-native-webview'
-import { sendUdpDefault } from "./InitScreen";
+import { sendUdpDefault } from "./BasicFuntions";
 import { styles } from "./Styles";
 import ExpWebview from "./ExpWebview";
 import VideoPlayer from 'react-native-video-controls';

@@ -1,7 +1,7 @@
 import React, { createRef } from "react";
 import {Text,StyleSheet,TouchableOpacity,View, Alert, Dimensions, ScrollView, Image, Button} from 'react-native';
 import {WebView} from 'react-native-webview'
-import { sendUdpDefault } from "./InitScreen";
+import { sendUdpDefault } from "./BasicFuntions";
 import CheckBox from "@react-native-community/checkbox";
 import { styles } from "./Styles";
 import ExpWebview from "./ExpWebview";

@@ -371,11 +371,19 @@ void execOTA(String bin_name) {
  
   // check contentLength and content type
   if (contentLength && isValidContentType) {
+
     // Check if there is enough to OTA Update
     bool canBegin = Update.begin(contentLength,U_FLASH);
  
     // If yes, begin
     if (canBegin) {
+        for(int i=0;i<10;i++){
+            setPixel(i,1);
+            FastLED.show();
+            delay(1000);
+            setPixel(i,0);
+        }
+        FastLED.show();
       Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quite for a while.. Patience!");
       // No activity would appear on the Serial monitor
       // So be patient. This may take 2 - 5mins to complete
@@ -383,8 +391,22 @@ void execOTA(String bin_name) {
  
       if (written == contentLength) {
         Serial.println("Written : " + String(written) + " successfully");
+        for(int i=0;i<10;i++){
+            setPixel(i,1);
+            FastLED.show();
+            delay(20);
+            setPixel(i,0);
+        }
+        FastLED.show();
       } else {
         Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?" );
+        for(int i=NUM_LEDS-10;i<NUM_LEDS;i++){
+            setPixel(i,1);
+            FastLED.show();
+            delay(20);
+            setPixel(i,0);
+        }
+        FastLED.show();
         // retry??
         // execOTA();
       }
