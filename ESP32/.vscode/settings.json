@@ -7,5 +7,6 @@
         "fstream": "cpp",
         "cstdlib": "cpp",
         "memory": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

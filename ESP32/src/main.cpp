@@ -1,5 +1,18 @@
 #include <Arduino.h>
-#include <FastLED.h>
+//宏定义，如果要用Adafruit_NeoPixel版本的，就把下面这行注释掉
+//#define __Enable_FastLED
+#define LED_PIN 26
+#define NUM_LEDS 269
+//
+#ifdef __Enable_FastLED
+#   include <FastLED.h>
+    CRGB leds[NUM_LEDS];
+#endif
+#ifndef __Enable_FastLED
+#   include <Adafruit_NeoPixel.h>
+    Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_LEDS+1, LED_PIN, NEO_GRB + NEO_KHZ800);//初始化2812
+#endif
+//
 #include <WiFi.h>
 #include <AsyncUDP.h>
 #include <WiFiUdp.h>
@@ -16,12 +29,12 @@
 #define SERVICE_UUID "85253ceb-b0b7-4cc2-8e81-c22affa36a43"
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
-#define LED_PIN 26
-//#define LED_PIN 12
-#define NUM_LEDS 269
-String ssid="Redmi K30i 5G",password="zteztezte";
-CRGB leds[NUM_LEDS];
 
+//#define LED_PIN 12
+
+String ssid="wifi_name",password="wifi_pwd";
+
+//Network
 AsyncUDP Udp;
 WiFiUDP UDP2;
 WiFiClient client;
@@ -35,14 +48,18 @@ BLEServer *pServer = NULL;
 BLECharacteristic *wifi_characteristic = NULL;
 String wifiValue="";
 BLECharacteristic *message_characteristic = NULL;
+//
 
+//Facial Expressions
 String expTxt="";
 DynamicJsonDocument expJSON(32768);
 
 int exp_now[4]={1,1,1,1};
 String catNameList[4]={"eye_left","eye_right","cheek","mouth"};
-
 //
+
+//Settings
+int Brightness=40;
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -78,14 +95,36 @@ class CharacteristicsCallbacks : public BLECharacteristicCallbacks
 };
 
 void setPixel(int pixelId,int tp){
-    if(tp) leds[pixelId]=CRGB(255,0,255);
-    else leds[pixelId]=CRGB::Black;
+    #ifdef __Enable_FastLED
+        if(tp) leds[pixelId]=CRGB(255,0,255);
+        else leds[pixelId]=CRGB::Black;
+    #endif
+    #ifndef __Enable_FastLED
+        if(tp) pixels.setPixelColor(pixelId,pixels.Color(255,0,255));
+        else pixels.setPixelColor(pixelId,pixels.Color(0,0,0));
+    #endif
 }
 
 void setFace(String catName,int expid,int tp){
     for(int i=0;i<expJSON[catName][expid].size();i++){
         setPixel(expJSON[catName][expid][i],tp);
     }
+}
+void showFrame(){
+    #ifdef __Enable_FastLED
+        FastLED.show();
+    #endif
+    #ifndef __Enable_FastLED
+        pixels.show();
+    #endif
+}
+void setLedBrightness(int brtns){
+    #ifdef __Enable_FastLED
+        FastLED.setBrightness(brtns);
+    #endif
+    #ifndef __Enable_FastLED
+        pixels.setBrightness(brtns);
+    #endif
 }
 
 void numStr_to_numArray(const char * numStr, int * numArr, int numArrLen) {
@@ -188,16 +227,21 @@ int log_to_serial(const char *fmt, va_list args) {
         return 0;
 }
 void setup() {
-    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(10);
-    
-    for(int i=0;i<NUM_LEDS;i++){
+    #ifdef __Enable_FastLED
+        FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+    #endif
+    #ifndef __Enable_FastLED
+        pixels.begin();
+    #endif
+    setLedBrightness(Brightness);
+
+    for(int i=0;i<NUM_LEDS/2;i++){
         setPixel(i,1);
-        FastLED.show();
+        showFrame();
         delay(20);
         setPixel(i,0);
     }
-    FastLED.show();
+    showFrame();
     //Connect to Wifi
     {
     Serial.begin(9600);
@@ -234,7 +278,7 @@ void loop() {
                     for(int i=0;i<4;i++){
                         setFace(catNameList[i],exp_now[i],1);
                     }
-                    FastLED.show();
+                    showFrame();
                 }
             }else if(buf[0]=='C'){
                 expTxt="";
@@ -246,12 +290,17 @@ void loop() {
                 for(int i=0;i<4;i++){
                     setFace(catNameList[i],exp_now[i],1);
                 }
-                FastLED.show();
+                showFrame();
             }else if(buf[0]=='U'){
                 //更新固件
                 Updating=true;
                 String get_bin_name=buf+2;
                 execOTA(get_bin_name);
+            }else if(buf[0]=='S'){
+                //设置亮度
+                String BrtnsStr=buf+2;
+                Brightness=atoi(BrtnsStr.c_str());
+                setLedBrightness(Brightness);
             }
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);
@@ -261,11 +310,10 @@ void loop() {
 
 
 // Variables to validate
-// response from S3
 int contentLength = 0;
 bool isValidContentType = false;
  
-// S3 Bucket Config
+// Server Config
 const String host = "101.133.137.243"; // Host => bucket-name.s3.region.amazonaws.com
 const int port = 1101; // Non https. For HTTPS 443. As of today, HTTPS doesn't work.
 const String url_pre="http://101.133.137.243:1101";
@@ -379,11 +427,11 @@ void execOTA(String bin_name) {
     if (canBegin) {
         for(int i=0;i<10;i++){
             setPixel(i,1);
-            FastLED.show();
+            showFrame();
             delay(1000);
             setPixel(i,0);
         }
-        FastLED.show();
+        showFrame();
       Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quite for a while.. Patience!");
       // No activity would appear on the Serial monitor
       // So be patient. This may take 2 - 5mins to complete
@@ -393,20 +441,20 @@ void execOTA(String bin_name) {
         Serial.println("Written : " + String(written) + " successfully");
         for(int i=0;i<10;i++){
             setPixel(i,1);
-            FastLED.show();
+            showFrame();
             delay(20);
             setPixel(i,0);
         }
-        FastLED.show();
+        showFrame();
       } else {
         Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?" );
         for(int i=NUM_LEDS-10;i<NUM_LEDS;i++){
             setPixel(i,1);
-            FastLED.show();
+            showFrame();
             delay(20);
             setPixel(i,0);
         }
-        FastLED.show();
+        showFrame();
         // retry??
         // execOTA();
       }
