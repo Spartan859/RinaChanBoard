@@ -1,7 +1,7 @@
 #include <Arduino.h>
 //宏定义，如果要用Adafruit_NeoPixel版本的，就把下面这行注释掉
 //#define __Enable_FastLED
-#define LED_PIN 26
+#define LED_PIN 12
 #define NUM_LEDS 269
 //
 #ifdef __Enable_FastLED
