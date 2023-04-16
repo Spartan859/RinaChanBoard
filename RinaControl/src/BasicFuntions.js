@@ -28,10 +28,12 @@ socket.bind(23333,(err)=>{
     socket.setBroadcast(true);
 });
 socket.on('message', function(msg, rinfo) {
-    ipa_out=buffer2str(msg);
-    storeData('ipa_out',ipa_out);
-    console.log('Message received', ipa_out);
-    Alert.alert('Message received', ipa_out);
+    if(is_ip(msg)){
+        ipa_out=buffer2str(msg);
+        storeData('ipa_out',ipa_out);
+        console.log('Message received', ipa_out);
+        Alert.alert('wifi连接成功！', 'ip: '+ipa_out+'\n如果璃奈板未显示初始表情，或表情显示不完整，请手动点击“发送配置文件”');
+    }
 })
 
 export {socket};

@@ -35,7 +35,7 @@ const requestBLEPermission = async () => {
 export default function BleTest(){
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState({});
-    const [message, setMessage] = useState('Nothing Yet');
+    const [message, setMessage] = useState('蓝牙暂未连接成功');
     //var wifiValue='ExampleSSID;ExamplePWD';
     const [ssid,setSSID]=useState(null);
     const [pwd,setPWD]=useState(null);
@@ -51,6 +51,9 @@ export default function BleTest(){
             console.log('connected to device!');
             setConnectedDevice(device);
             setIsConnected(true);
+            Alert.alert("蓝牙连接成功！",
+            "请在输入框中依次填写好 wifi/热点 名称、密码，并点击“发送wifi信息！”"+
+            "\n 注意：wifi/热点 必须设置为2.4ghz而非5ghz，并关闭wifi6选项，否则无法连接！");
             return device.discoverAllServicesAndCharacteristics();
         }).then(device=>{
             BLTManager.onDeviceDisconnected(device.id, (error, device) => {
@@ -61,7 +64,8 @@ export default function BleTest(){
             device
                 .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
                 .then(valenc => {
-                    setMessage(base64.decode(valenc.value));
+                    //setMessage(base64.decode(valenc.value));
+                    setMessage("若在发送Wifi信息前，蓝牙意外断开连接，请手动重启璃奈板")
                 });
             //Message
             device.monitorCharacteristicForService(
@@ -82,47 +86,6 @@ export default function BleTest(){
         }).catch((error)=>{
             console.log('Error connecting to device: '+error);
         });
-        // device
-        //     .connect()
-        //     .then(device => {
-        //         setConnectedDevice(device);
-        //         setIsConnected(true);
-        //         return device.discoverAllServicesAndCharacteristics();
-        //     })
-        //     .then(device => {
-        //         //  Set what to do when DC is detected
-        //         BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-        //             console.log('Device DC');
-        //             setIsConnected(false);
-        //         });
-
-        //         //Read inital values
-
-        //         //Message
-        //         device
-        //             .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
-        //             .then(valenc => {
-        //                 setMessage(base64.decode(valenc.value));
-        //             });
-
-        //         //Message
-        //         device.monitorCharacteristicForService(
-        //             SERVICE_UUID,
-        //             MESSAGE_UUID,
-        //             (error, characteristic) => {
-        //                 if (characteristic.value != null) {
-        //                     setMessage(base64.decode(characteristic.value));
-        //                     console.log(
-        //                         'Message update received: ',
-        //                         base64.decode(characteristic.value),
-        //                     );
-        //                 }
-        //             },
-        //             'messagetransaction',
-        //         );
-        //       
-        //         console.log('Connection established');
-        //     });
     }
 
     async function scanDevices(){
@@ -192,6 +155,27 @@ export default function BleTest(){
         <View style={styles.container}>
             <Text style={styles.bigBlue}>蓝牙配网</Text>
             <Text style={{fontSize:20}}>{message}</Text>
+            
+            <TouchableOpacity style={{width: 150}}>
+                {!isConnected ? (
+                    <Button
+                        title="先点我 连接至璃奈板"
+                        onPress={() => {
+                            scanDevices();
+                        }}
+                        disabled={false}
+                    />
+                ) : (
+                    <Button
+                        title="已连接！"
+                        onPress={() => {
+                            //disconnectDevice();
+                        }}
+                        disabled={true}
+                    />
+                )}
+            </TouchableOpacity>
+
             <TextInput
                 style={{ height: 50, width: 200,borderColor: 'gray', borderWidth: 1 }}
                 onChangeText={val => setSSID(val)}
@@ -202,29 +186,21 @@ export default function BleTest(){
                 onChangeText={val => setPWD(val)}
                 value={pwd}
             />
-            <TouchableOpacity style={{width: 120}}>
-                {!isConnected ? (
-                    <Button
-                        title="Connect"
-                        onPress={() => {
-                            scanDevices();
-                        }}
-                        disabled={false}
-                    />
-                ) : (
-                    <Button
-                        title="Disonnect"
-                        onPress={() => {
-                            disconnectDevice();
-                        }}
-                        disabled={false}
-                    />
-                )}
-            </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={async()=>{ 
+                onPress={async()=>{
+                    if(!isConnected){
+                        if(ipa_out!='null'){
+                            Alert.alert("蓝牙未连接",
+                            '当前已存ip: '
+                            +ipa_out+'\n如果璃奈板未显示初始表情，或表情显示不完整，请手动点击“发送配置文件”'
+                            +'\n如果你重启了璃奈板，请先点击上方蓝色按钮连接蓝牙！')
+                            return;
+                        }
+                        Alert.alert("蓝牙未连接","蓝牙未连接，无法发送wifi信息！")
+                        return;
+                    }
                     resetipa();
                     sendWifiValue(ssid+';'+pwd);
                     storeData('ssid',ssid);
@@ -236,9 +212,12 @@ export default function BleTest(){
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
-                onPress={async()=>{ 
-                    storeData('ssid',ssid);
-                    storeData('pwd',pwd);
+                onPress={async()=>{
+                    if(ipa_out=="null"){
+                        Alert.alert("wifi未连接","请确保已经发送wifi信息，并显示连接成功！")
+                        return;
+                    }
+                    Alert.alert("已经发送配置文件","若璃奈板仍然未显示初始表情，请重试！")
                     prepareInit();
                 }}
                 id="sendWifi_only">
