@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useEffect, useState} from "react";
 import { NetworkInfo } from "react-native-network-info";
 
 import base64 from 'react-native-base64'
@@ -12,6 +12,8 @@ import { ipa_out } from "./BasicFuntions";
 import { resetipa } from "./BasicFuntions";
 
 import { storeData,getData } from "./LocalDataStorage";
+import DropDownPicker from 'react-native-dropdown-picker';
+import {Slider} from '@miblanchard/react-native-slider';
 
 const BLTManager=new BleManager();
 
@@ -36,12 +38,17 @@ export default function BleTest(){
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState({});
     const [message, setMessage] = useState('蓝牙暂未连接成功');
+    const [openFWSel,setOpenFWSel] = useState(false);
+    const [FWList,setFWList]=useState([]);
     //var wifiValue='ExampleSSID;ExamplePWD';
     const [ssid,setSSID]=useState(null);
     const [pwd,setPWD]=useState(null);
     const [updateVersion,setUpdateVersion]=useState("0.0.2");
+    const [brightness,setBrightness]=useState(40);
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
+
+    useEffect(()=>{if(FWList[0]==null) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})});
 
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {
@@ -151,6 +158,22 @@ export default function BleTest(){
         }
         sendInit();
     }
+
+    async function FetchFirmwareList(){
+        var FirmwareList=[];
+        var FileList=await (await fetch('http://101.133.137.243:1101/RinaChanBoard_FirmwareRelease/')).json();
+        for(var i in FileList){
+            if(FileList[i]['name']=='README.md') continue;
+            var file_name=FileList[i]['name'].substring(0,FileList[i]['name'].lastIndexOf("."));
+            FirmwareList[i]={label: file_name,value: file_name};
+        }
+        return FirmwareList;
+    }
+    const handleBrightnessChange=(newValue)=>{
+        newValue=Math.round(newValue);
+        setBrightness(newValue);
+        sendUdpDefault('S '+newValue);
+    }
     return(
         <View style={styles.container}>
             <Text style={styles.bigBlue}>蓝牙配网</Text>
@@ -223,14 +246,26 @@ export default function BleTest(){
                 id="sendWifi_only">
                 <Text style={{fontSize:30}}>发送配置文件</Text>
             </TouchableOpacity>
-            <TextInput
-                style={{ height: 50, width: 200,borderColor: 'gray', borderWidth: 1 }}
-                onChangeText={val => setUpdateVersion(val)}
-                value={updateVersion}
-            />
+            
+            
+            <View style={[styles.container,{flex:0.3,zIndex:2,width:250}]}>
+                <DropDownPicker
+                    //onChangeValue={(value) => console.log(value)}
+                    open={openFWSel}
+                    value={updateVersion}
+                    items={FWList}
+                    setOpen={setOpenFWSel}
+                    setValue={setUpdateVersion}
+                    setItems={setFWList}
+                />
+            </View>
             <TouchableOpacity
                 style={styles.button}
                 onPress={async()=>{ 
+                    if(ipa_out=="null"){
+                        Alert.alert("wifi未连接","请确保已经发送wifi信息，并显示连接成功！")
+                        return;
+                    }
                     Alert.alert(
                         "警告",
                         "确认更新固件至版本"+updateVersion+'?',
@@ -243,6 +278,15 @@ export default function BleTest(){
                 id="SendUpdateCommand">
                 <Text style={{fontSize:30}}>发送固件更新指令</Text>
             </TouchableOpacity>
+            <View style={[styles.slider_container,{flex:0.3,width:300}]}>
+                <Slider
+                    minimumValue={1}
+                    maximumValue={255}
+                    value={brightness}
+                    onSlidingComplete={handleBrightnessChange}
+                />
+                <Text style={{fontSize:15}}>设置亮度：{brightness}</Text>
+            </View>
         </View>
     );
 }

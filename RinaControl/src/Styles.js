@@ -76,4 +76,8 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#DDDDDD",
     },
+    slider_container: {
+        alignItems: 'stretch',
+        justifyContent: 'center',
+    }
   });

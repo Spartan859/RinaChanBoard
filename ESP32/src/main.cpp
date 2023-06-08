@@ -32,6 +32,8 @@
 
 //#define LED_PIN 12
 
+const int versionArray[]={0,0,3};
+
 String ssid="wifi_name",password="wifi_pwd";
 
 //Network
@@ -108,6 +110,24 @@ void setPixel(int pixelId,int tp){
 void setFace(String catName,int expid,int tp){
     for(int i=0;i<expJSON[catName][expid].size();i++){
         setPixel(expJSON[catName][expid][i],tp);
+    }
+}
+const int numbers[][30]={
+    {98,107,130,139,97,140,96,141,95,142,94,143,93,144,92,113,124,145},
+    {139,140,141,142,143,144,145},
+    {98,107,130,139,140,141,95,110,127,142,94,93,92,113,124,145},
+    {98,107,130,139,140,141,95,110,127,142,143,144,92,113,124,145},
+    {98,139,97,140,96,141,95,110,127,142,143,144,145},
+    {98,107,130,139,97,96,95,110,127,142,143,144,92,113,124,145},
+    {98,107,130,139,97,96,95,110,127,142,94,143,93,144,92,113,124,145},
+    {98,107,130,139,140,141,142,143,144,145},
+    {98,107,130,139,97,140,96,141,95,110,127,142,94,143,93,144,92,113,124,145},
+    {98,107,130,139,97,140,96,141,95,110,127,142,143,144,92,113,124,145}
+};
+void setNumber(int num,int tp){
+    for(int i=0;i<30;i++){
+        if(numbers[num][i]==0) break;
+        setPixel(numbers[num][i],tp);
     }
 }
 void showFrame(){
@@ -234,14 +254,22 @@ void setup() {
         pixels.begin();
     #endif
     setLedBrightness(Brightness);
-
+    /*
     for(int i=0;i<NUM_LEDS/2;i++){
         setPixel(i,1);
         showFrame();
         delay(20);
         setPixel(i,0);
     }
-    showFrame();
+    showFrame();*/
+    for(int i=0;i<3;i++){
+        setNumber(versionArray[i],1);
+        showFrame();
+        delay(600);
+        setNumber(versionArray[i],0);
+        showFrame();
+        delay(200);
+    }
     //Connect to Wifi
     {
     Serial.begin(9600);
@@ -301,6 +329,7 @@ void loop() {
                 String BrtnsStr=buf+2;
                 Brightness=atoi(BrtnsStr.c_str());
                 setLedBrightness(Brightness);
+                showFrame();
             }
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);
