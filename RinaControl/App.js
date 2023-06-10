@@ -1,7 +1,7 @@
 import React from "react";
 import {Text,StyleSheet,TouchableOpacity,View, Alert, Dimensions, ScrollView, Image, Button} from 'react-native';
 import RNFS from 'react-native-fs'
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {WebView} from 'react-native-webview'
 import { sendUdpDefault } from "./src/BasicFuntions";
@@ -9,6 +9,7 @@ import CheckBox from "@react-native-community/checkbox";
 import BleTest from "./src/BleTest";
 import AutoLive from "./src/AutoLive";
 import ManualScreen from "./src/ManualScreen";
+import DownloadLive from "./src/DownloadLive";
 import { styles } from "./src/Styles";
 
 let exppath=RNFS.DocumentDirectoryPath + '/expressions.json';
@@ -42,6 +43,7 @@ RNFS.exists(ScreenHtmlPath).then((value)=>{//若本地不存在，则调用创�
 });  
 
 const Tab=createBottomTabNavigator();
+
 function AllTabs(){
     return (
         <Tab.Navigator
@@ -61,7 +63,8 @@ function AllTabs(){
         >
             <Tab.Screen name="配网" component={BleTest}/>
             <Tab.Screen name="手动" component={ManualScreen}/> 
-            <Tab.Screen name="Live" component={AutoLive}/> 
+            <Tab.Screen name="Live" component={AutoLive}/>
+            <Tab.Screen name="下载资源" component={DownloadLive}/> 
         </Tab.Navigator>
     );
 }

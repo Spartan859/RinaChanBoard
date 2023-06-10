@@ -1,11 +1,16 @@
 import React, {useEffect, useState,createRef} from "react";
-import {View,Dimensions} from 'react-native';
+import {View,Dimensions,Alert} from 'react-native';
 import {WebView} from 'react-native-webview'
 import { sendUdpDefault } from "./BasicFuntions";
 import { styles } from "./Styles";
 import ExpWebview from "./ExpWebview";
 import VideoPlayer from 'react-native-video-controls';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { nowdownloading } from "./DownloadLive";
+import { ExpTxtNtDl } from "./DownloadLive";
+import { getData, storeData } from "./LocalDataStorage";
+import { FetchLiveList } from "./DownloadLive";
+import RNFS from "react-native-fs";
 
 const FPS=10;
 var server="http://101.133.137.243:1101/";
@@ -26,26 +31,16 @@ var ExpTxtListTmp=[];
 var lastFrame=-1;
 
 async function DownloadExpTxt(){
-    console.log("Downloading");
-    var FileList=await (await fetch('http://101.133.137.243:1101/RinaExpTxtFiles/')).json();
-    console.log(FileList)
     ExpTxtListTmp=[];
     ExpContent={};
-    for(var i in FileList){
-        var str=await (await fetch(server+'RinaExpTxtFiles/'+FileList[i]['name'])).text();
-        //console.log(str);
-        ExpContent[FileList[i]['name']]={};
-        ExpContent[FileList[i]['name']]['FrameList']=[];
-        
-        var all_Lines=str.trim().split('\n');
-        for(var j in all_Lines){
-            //console.log(j);
-            ExpContent[FileList[i]['name']]['FrameList'][j]=parseInt(all_Lines[j].split('!')[0]);
-            ExpContent[FileList[i]['name']][parseInt(all_Lines[j].split('!')[0])]=all_Lines[j].split('!')[1].split(',');
-        }
-        ExpTxtListTmp[i]={label: FileList[i]['name'].split('.')[0],value: FileList[i]['name']};
+    var i=0;
+    for(var file_name in ExpTxtNtDl){
+        if(ExpTxtNtDl[file_name]==true) continue;
+        ExpContent[file_name]=JSON.parse(await getData(file_name));
+        console.log(ExpContent[file_name]);
+        ExpTxtListTmp[i]={label: file_name,value: file_name};
+        i=i+1;
     }
-    console.log(ExpContent["田中千惠美 - Analogue Heart.mp3.txt"][0]);
 }
 
 const setExp_ref=createRef();
@@ -57,8 +52,15 @@ function setExp(catName,expId,tp){
 export default function AutoLive(){
     const [ExpTxtList,SetExpTxtList]=useState([]);
     const [openSongSel, setOpenSongSel] = useState(false);
-    const [SongSel, setSongSel] = useState("田中千惠美 - Analogue Heart.mp3.txt");
-    useEffect(()=>{if(ExpTxtList[0]==null) DownloadExpTxt().then(()=>{SetExpTxtList(ExpTxtListTmp);console.log(ExpTxtList)});})
+    const [SongSel, setSongSel] = useState("Doki Pipo Emotion(short).mp3");
+    getData('newSongAdded').then((res)=>{
+        console.log("hqkweqw");
+        if(res=="true"||ExpTxtList[0]==null){
+            DownloadExpTxt().then(()=>{
+                storeData('newSongAdded',"false").then(()=>{SetExpTxtList(ExpTxtListTmp);});
+            });
+        }
+    });
     function progressMonitor(data){
         //console.log(data.currentTime);
         var curFrame=data.currentTime*FPS;
@@ -78,7 +80,7 @@ export default function AutoLive(){
             setExp(catName,exp_all[catName],1);
             //if(catName=='cheek') console.log(exp_all[catName]);
         }
-        sendUdpDefault('e'+getExpSendStr())
+        sendUdpDefault('e'+getExpSendStr());
         //console.log(nextframe);
     }
     return(
@@ -95,16 +97,18 @@ export default function AutoLive(){
                     setOpen={setOpenSongSel}
                     setValue={setSongSel}
                     setItems={SetExpTxtList}
+                    disabled={false}
                 />
             </View>
             
             <View style={{flex:0.5,zIndex:1}}>
                 <VideoPlayer 
-                source={{uri: "http://101.133.137.243:1101/"+SongSel.substring(0,SongSel.length-4)}}
+                source={{uri: RNFS.DocumentDirectoryPath+'/'+SongSel}}
                 ref={(ref)=>{this.player=ref}}
                 onProgress={progressMonitor}
                 progressUpdateInterval={20}
                 paused={true}
+                controlTimeout={1000000}
                 /*
                 playWhenInactive={true}
                 playInBackground={true}

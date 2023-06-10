@@ -14,6 +14,8 @@ import { resetipa } from "./BasicFuntions";
 import { storeData,getData } from "./LocalDataStorage";
 import DropDownPicker from 'react-native-dropdown-picker';
 import {Slider} from '@miblanchard/react-native-slider';
+import { DownloadLiveFiles,FetchLiveList } from "./DownloadLive";
+import CheckBox from "@react-native-community/checkbox";
 
 const BLTManager=new BleManager();
 
@@ -34,6 +36,8 @@ const requestBLEPermission = async () => {
     }
   };
 
+export var OfflineMode=false;
+
 export default function BleTest(){
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState({});
@@ -45,10 +49,21 @@ export default function BleTest(){
     const [pwd,setPWD]=useState(null);
     const [updateVersion,setUpdateVersion]=useState("0.0.2");
     const [brightness,setBrightness]=useState(40);
+    const [oflm,setOflm]=useState(false);
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
+    getData("Doki Pipo Emotion(short).mp3").then((res)=>{
+        FetchLiveList();
+        console.log("askdjqkwlje");
+        if(res==null){
+            DownloadLiveFiles("Doki Pipo Emotion(short).mp3").then(()=>{
+                FetchLiveList();
+            });
+        }
+    }).then(()=>{
+        if(FWList[0]==null) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})
+    })
 
-    useEffect(()=>{if(FWList[0]==null) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})});
 
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {
@@ -286,6 +301,19 @@ export default function BleTest(){
                     onSlidingComplete={handleBrightnessChange}
                 />
                 <Text style={{fontSize:15}}>设置亮度：{brightness}</Text>
+            </View>
+            <View style={[styles.container,{flex:0.3,flexDirection:'row'}]}>
+                <Text style={{fontSize:30}}>离线模式</Text>
+                <CheckBox
+                    //disabled={false}
+                    value={oflm}
+                    onValueChange={
+                        (val)=>{
+                            setOflm(val);
+                            OfflineMode=val;
+                        }
+                    }
+                />
             </View>
         </View>
     );
