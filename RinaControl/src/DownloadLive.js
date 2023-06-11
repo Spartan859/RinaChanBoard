@@ -1,24 +1,14 @@
-import React, {useEffect, useState} from "react";
-import {FlatList,View, SectionList,Alert} from 'react-native';
-import { sendUdpDefault } from "./BasicFuntions";
+import React, {useState} from "react";
+import {FlatList,View,Alert} from 'react-native';
 import { styles } from "./Styles";
-import ExpWebview from "./ExpWebview";
-import VideoPlayer from 'react-native-video-controls';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { storeData,getData,rmData } from "./LocalDataStorage";
 import { Text } from "react-native";
 import { TouchableOpacity,Button } from "react-native";
 import RNFS from 'react-native-fs'
-import { useNavigation } from "@react-navigation/native";
 import { OfflineMode } from "./BleTest";
 
-const FPS=10;
 var server="http://101.133.137.243:1101/";
 
-//var currentTime=0;
-var ExpContent={};
-var ExpTxtListTmp=[];
-var lastFrame=-1;
 export var ExpTxtNtDl={};
 export var nowdownloading=false;
 var progress_dl=0;
@@ -28,7 +18,6 @@ export async function FetchLiveList(){
     var FileList=null;
     console.log(OfflineMode);
     if(!OfflineMode){
-        console.log("NOOOOOOOOOOOOOO");
         FileList=await (await fetch('http://101.133.137.243:1101/RinaExpTxtFiles/')).json();
         if(FileList!=null)
             await storeData('FileList',JSON.stringify(FileList));

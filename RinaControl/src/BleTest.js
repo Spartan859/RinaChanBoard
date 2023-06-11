@@ -14,9 +14,8 @@ import { resetipa } from "./BasicFuntions";
 import { storeData,getData } from "./LocalDataStorage";
 import DropDownPicker from 'react-native-dropdown-picker';
 import {Slider} from '@miblanchard/react-native-slider';
-import { DownloadLiveFiles,FetchLiveList } from "./DownloadLive";
+import { DownloadLiveFiles,FetchLiveList, nowdownloading } from "./DownloadLive";
 import CheckBox from "@react-native-community/checkbox";
-
 const BLTManager=new BleManager();
 
 const SERVICE_UUID='85253ceb-b0b7-4cc2-8e81-c22affa36a43';
@@ -52,18 +51,25 @@ export default function BleTest(){
     const [oflm,setOflm]=useState(false);
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
-    getData("Doki Pipo Emotion(short).mp3").then((res)=>{
-        FetchLiveList();
-        console.log("askdjqkwlje");
-        if(res==null){
-            DownloadLiveFiles("Doki Pipo Emotion(short).mp3").then(()=>{
-                FetchLiveList();
-            });
+    fetch('http://101.133.137.243:1101/RinaExpTxtFiles/').then((ulrt)=>{
+        if(ulrt["ok"]==false&&!OfflineMode){
+            OfflineMode=true;
+            setOflm(true);
+            Alert.alert("无法连接到服务器！","现在处于离线状态(除下载功能外可正常使用)");
+            return;
         }
-    }).then(()=>{
-        if(FWList[0]==null) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})
+        getData("Doki Pipo Emotion(short).mp3").then((res)=>{
+            FetchLiveList();
+            console.log("askdjqkwlje");
+            if(res==null&&!nowdownloading&&!OfflineMode){
+                DownloadLiveFiles("Doki Pipo Emotion(short).mp3").then(()=>{
+                    FetchLiveList();
+                });
+            }
+        }).then(()=>{
+            if(FWList[0]==null&&!OfflineMode) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})
+        })
     })
-
 
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {

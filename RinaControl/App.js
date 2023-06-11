@@ -11,6 +11,7 @@ import AutoLive from "./src/AutoLive";
 import ManualScreen from "./src/ManualScreen";
 import DownloadLive from "./src/DownloadLive";
 import { styles } from "./src/Styles";
+import CustomExp from "./src/CustomExp";
 
 let exppath=RNFS.DocumentDirectoryPath + '/expressions.json';
 const createLocalExpFile=()=>{
@@ -58,6 +59,12 @@ function AllTabs(){
                     if(route.name=="Live"){
                         return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>寺</Text>;
                     }
+                    if(route.name=="下载资源"){
+                        return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>璃</Text>;
+                    }
+                    if(route.name=="自定义表情"){
+                        return <Text style={{color:color,fontWeight: 'bold',fontSize: 20}}>奈</Text>;
+                    }
                 },
             })}
         >
@@ -65,6 +72,7 @@ function AllTabs(){
             <Tab.Screen name="手动" component={ManualScreen}/> 
             <Tab.Screen name="Live" component={AutoLive}/>
             <Tab.Screen name="下载资源" component={DownloadLive}/> 
+            <Tab.Screen name="自定义表情" component={CustomExp}/> 
         </Tab.Navigator>
     );
 }
