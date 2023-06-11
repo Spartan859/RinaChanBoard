@@ -37,6 +37,13 @@ const requestBLEPermission = async () => {
 
 export var OfflineMode=false;
 
+function eternal_alert(){
+    Alert.alert("处于离线模式","初次启动，必须先下载必要文件！请联网后重启！",
+            [{text:'ok',onPress:()=>{
+                eternal_alert();
+            }}]);
+}
+
 export default function BleTest(){
     const [isConnected, setIsConnected] = useState(false);
     const [connectedDevice, setConnectedDevice] = useState({});
@@ -61,7 +68,11 @@ export default function BleTest(){
         getData("Doki Pipo Emotion(short).mp3").then((res)=>{
             FetchLiveList();
             console.log("askdjqkwlje");
-            if(res==null&&!nowdownloading&&!OfflineMode){
+            if(res==null&&!nowdownloading){
+                if(OfflineMode){
+                    eternal_alert();
+                    return;
+                }
                 DownloadLiveFiles("Doki Pipo Emotion(short).mp3").then(()=>{
                     FetchLiveList();
                 });

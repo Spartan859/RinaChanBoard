@@ -43,14 +43,12 @@ const ExpWebview=forwardRef((props,ref)=>{
             <head>
                 <meta charset="utf-8"> 
                 <title>RinaBoard Expressions</title>
-                <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/@lyo/neat-csv"></script>
                 <style type="text/css">
                     .left{ float:left; border:1px solid #ccc;}
                     .p{color:green;font-size:5px;}
                 </style>
             </head>
-            
+
             <div id="bigbox"></div>
             <script>
                 window.onload=function(){
@@ -70,7 +68,7 @@ const ExpWebview=forwardRef((props,ref)=>{
                             //pixel_html_str+="<div class=\"left\" id=\"pixel_"+(i)+'_'+(j)+"\""></div>"
                             var div_pixel=document.createElement("div");
                             div_pixel.setAttribute("class","left");
-                            console.log(pixel_height);
+                            //console.log(pixel_height);
                             div_pixel.style.width=pixel_width+'px';
                             div_pixel.style.height=pixel_height+'px';
                             div_pixel.id="pixel_"+i.toString()+'_'+j.toString();
@@ -84,9 +82,11 @@ const ExpWebview=forwardRef((props,ref)=>{
                 }
                 function setPixel(x,y,tp){
                     if(tp==1){
-                        $('#pixel_'+x.toString()+'_'+y.toString()).css('background-color', 'red');
+                        var element=document.getElementById('pixel_'+x.toString()+'_'+y.toString());
+                        element.style.backgroundColor="red";
                     }else{
-                        $('#pixel_'+x.toString()+'_'+y.toString()).css('background-color', 'white');
+                        var element=document.getElementById('pixel_'+x.toString()+'_'+y.toString());
+                        element.style.backgroundColor="white";
                     }
                 }
                 /*
