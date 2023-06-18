@@ -54,11 +54,12 @@ export default function CustomExp(){
     const [CatSel, setCatSel] = useState("eye_left");
     const [UselessState,setUselessState]=useState(0);
     const ViewShotRef=useRef();
-    function getWbvImage(){
+    function getWbvImage(tp){
         ViewShotRef.current.capture().then(uri => {
             UriList[toWhichCat][exp_matrix[toWhichCat].length]=uri;
             storeData('UriList',JSON.stringify(UriList)).then(upd_UriList);
-            setExp_ref.current.outputAll();
+            if(tp==2) setExp_ref.current.outputAll();
+            else if(tp==1) setExp_ref.current.outputSel();
         })
     }
     
@@ -132,7 +133,7 @@ export default function CustomExp(){
                         <Button
                             title="导出区域"
                             onPress={()=>{
-                                getWbvImage();
+                                getWbvImage(1);
                                 setTimeout(()=>{setUselessState(UselessState^1)},500);
                             }}
                         />
@@ -141,7 +142,7 @@ export default function CustomExp(){
                         <Button
                             title="导出全图"
                             onPress={()=>{
-                                getWbvImage();
+                                getWbvImage(2);
                                 setTimeout(()=>{setUselessState(UselessState^1)},500);
                             }}
                         />

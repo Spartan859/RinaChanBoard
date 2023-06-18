@@ -32,7 +32,7 @@
 
 //#define LED_PIN 12
 
-const int versionArray[]={0,0,3};
+const int versionArray[]={0,0,4};
 
 String ssid="wifi_name",password="wifi_pwd";
 
