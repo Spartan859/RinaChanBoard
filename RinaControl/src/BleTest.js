@@ -43,6 +43,36 @@ function eternal_alert(){
                 eternal_alert();
             }}]);
 }
+export var exp_matrix_ori;
+export function upd_ExpMatrix(){
+    getData('ExpMatrix').then((res)=>{
+        if(res==null){
+            var exp_matrix_tmp=require('../assets/expressions.json');
+            storeData('ExpMatrix',JSON.stringify(exp_matrix_tmp));
+        }else{
+            exp_matrix_ori=JSON.parse(res);
+        }
+        sendInit();
+    });
+}
+export var UriList_ori={};
+var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0,"full_face":0};
+for(var catx in exp_all){
+    UriList_ori[catx]=new Array(1000).fill(0);
+}
+export function upd_UriList(){
+    getData('UriList').then((res)=>{
+        if(res==null){
+            storeData('UriList',JSON.stringify(UriList_ori));
+        }else{
+            UriList_ori=JSON.parse(res);
+        }
+    });
+}
+
+
+
+
 
 export default function BleTest(){
     const [isConnected, setIsConnected] = useState(false);
@@ -58,6 +88,8 @@ export default function BleTest(){
     const [oflm,setOflm]=useState(false);
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
+    upd_ExpMatrix();
+    upd_UriList();
     fetch('http://101.133.137.243:1101/RinaExpTxtFiles/').then((ulrt)=>{
         if(ulrt["ok"]==false&&!OfflineMode){
             OfflineMode=true;

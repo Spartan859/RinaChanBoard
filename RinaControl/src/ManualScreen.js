@@ -5,11 +5,15 @@ import { sendUdpDefault } from "./BasicFuntions";
 import CheckBox from "@react-native-community/checkbox";
 import { styles } from "./Styles";
 import ExpWebview from "./ExpWebview";
+import { getData } from "./LocalDataStorage";
+import { UriList_ori, exp_matrix_ori } from "./BleTest";
 
 export var id_matrix=require('../assets/RinaInit.json');
 export var id_to_coordinate=[[],[]];
-export var exp_matrix=require('../assets/expressions.json');
-var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0};
+var exp_matrix=exp_matrix_ori;
+var UriList=UriList_ori;
+
+var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0,"full_face":0};
 
 var hei=16,len=18;
     for(var i=0;i<hei;i++)
@@ -82,7 +86,9 @@ setTimeout(neverEndLoop,5000);
 export default function ManualScreen(){
     const [syncLR,setSyncLR]=React.useState(false);
     const [autoExp,setAutoExp]=React.useState(false);
+    const [UselessState,setUselessState]=React.useState(0);
     function ExpItem(catName,expId){
+        //console.log(catName,expId);
         function PressHandler(){
             setExp(catName,exp_all[catName],0);
             exp_all[catName]=expId;
@@ -101,6 +107,7 @@ export default function ManualScreen(){
             }
         }
         uri_image=catName+expId;
+        if(UriList[catName][expId]!=0) uri_image=UriList[catName][expId];
         //console.log(uri_image);
         return (
             <TouchableOpacity
@@ -149,7 +156,14 @@ export default function ManualScreen(){
                 <ScrollView horizontal={true} style={styles.horizontal_scroll}>
                     {item_list["mouth"]}
                 </ScrollView>
+                <ScrollView horizontal={true} style={styles.horizontal_scroll}>
+                    {item_list["full_face"]}
+                </ScrollView>
                 <View style={[styles.container,{flex:0.5,flexDirection:'row'}]}>
+                    <Button
+                        title="刷新"
+                        onPress={()=>{setUselessState(UselessState^1)}}
+                    />
                     <CheckBox
                         //disabled={false}
                         value={syncLR}

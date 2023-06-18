@@ -15,13 +15,13 @@ import RNFS from "react-native-fs";
 const FPS=10;
 var server="http://101.133.137.243:1101/";
 
-var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0};
-const exp_order={"eye_left":0,"eye_right":1,"cheek":3,"mouth":2};
+var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0,"full_face":0};
+const exp_order={"eye_left":0,"eye_right":1,"cheek":3,"mouth":2,"full_face":4};
 
 function getExpSendStr(){
     return exp_all['eye_left'].toString()+','+exp_all['eye_right'].toString()
     +','+exp_all['cheek'].toString()
-    +','+exp_all['mouth'].toString()+',';
+    +','+exp_all['mouth'].toString()+','+exp_all['full_face']+',';
 }
 //var currentTime=0;
 var music_player_ref;

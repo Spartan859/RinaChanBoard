@@ -56,8 +56,8 @@ BLECharacteristic *message_characteristic = NULL;
 String expTxt="";
 DynamicJsonDocument expJSON(32768);
 
-int exp_now[4]={1,1,1,1};
-String catNameList[4]={"eye_left","eye_right","cheek","mouth"};
+int exp_now[5]={1,1,1,1,0};
+String catNameList[5]={"eye_left","eye_right","cheek","mouth","full_face"};
 //
 
 //Settings
@@ -303,7 +303,7 @@ void loop() {
                 deserializeJson(expJSON,expTxt);
                 //Serial.println(expTxt);
                 if((int)expJSON["mouth"][2][2]>0){
-                    for(int i=0;i<4;i++){
+                    for(int i=0;i<5;i++){
                         setFace(catNameList[i],exp_now[i],1);
                     }
                     showFrame();
@@ -311,11 +311,11 @@ void loop() {
             }else if(buf[0]=='C'){
                 expTxt="";
             }else if(buf[0]=='e'){
-                for(int i=0;i<4;i++){
+                for(int i=0;i<5;i++){
                     setFace(catNameList[i],exp_now[i],0);
                 }
-                numStr_to_numArray(buf+1,exp_now,4);
-                for(int i=0;i<4;i++){
+                numStr_to_numArray(buf+1,exp_now,5);
+                for(int i=0;i<5;i++){
                     setFace(catNameList[i],exp_now[i],1);
                 }
                 showFrame();

@@ -77,7 +77,9 @@ export async function DownloadLiveFiles(live_name){
     for(var j in all_Lines){
         //console.log(j);
         ExpFile['FrameList'][j]=parseInt(all_Lines[j].split('!')[0]);
-        ExpFile[parseInt(all_Lines[j].split('!')[0])]=all_Lines[j].split('!')[1].split(',');
+        var tttmp=all_Lines[j].split('!')[1].split(',');
+        tttmp.push("0");
+        ExpFile[parseInt(all_Lines[j].split('!')[0])]=tttmp;
     }
     ExpFile=JSON.stringify(ExpFile);
     await storeData(live_name,ExpFile);
