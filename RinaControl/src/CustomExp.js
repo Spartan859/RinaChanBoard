@@ -14,15 +14,23 @@ import ViewShot from "react-native-view-shot";
 var exp_matrix=exp_matrix_ori;
 
 var toWhichCat="eye_left";
+var curUri="";
 
 var UriList=UriList_ori;
 console.log(UriList['full_face'][1]);
 
 export function ExportExp(event){
+    if(event.nativeEvent.data=="ERR"){
+        Alert.alert("选定区域无效","请先选定一个有效的区域！");
+        return;
+    }
     var res=JSON.parse(event.nativeEvent.data);
     console.log(toWhichCat);
     exp_matrix[toWhichCat].push(res);
+    console.log("QOWIDASKNDLSAK"+JSON.stringify(exp_matrix)==JSON.stringify(exp_matrix_ori));
     storeData('ExpMatrix',JSON.stringify(exp_matrix)).then(upd_ExpMatrix);
+    UriList[toWhichCat][exp_matrix[toWhichCat].length-1]=curUri;
+    storeData('UriList',JSON.stringify(UriList))//.then(upd_UriList);
 }
 
 export var id_matrix=require('../assets/RinaInit.json');
@@ -56,8 +64,7 @@ export default function CustomExp(){
     const ViewShotRef=useRef();
     function getWbvImage(tp){
         ViewShotRef.current.capture().then(uri => {
-            UriList[toWhichCat][exp_matrix[toWhichCat].length]=uri;
-            storeData('UriList',JSON.stringify(UriList)).then(upd_UriList);
+            curUri=uri;
             if(tp==2) setExp_ref.current.outputAll();
             else if(tp==1) setExp_ref.current.outputSel();
         })

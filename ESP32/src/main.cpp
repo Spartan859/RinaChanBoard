@@ -315,6 +315,7 @@ void loop() {
                     setFace(catNameList[i],exp_now[i],0);
                 }
                 numStr_to_numArray(buf+1,exp_now,5);
+                Serial.println(buf);
                 for(int i=0;i<5;i++){
                     setFace(catNameList[i],exp_now[i],1);
                 }

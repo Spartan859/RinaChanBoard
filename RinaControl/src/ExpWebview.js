@@ -81,7 +81,7 @@ const ExpWebview=forwardRef((props,ref)=>{
                 \`);
                 //
                 var mode_sel=0;
-                var stx,sty,edx=1,edy=1;
+                var stx=2,sty=2,edx=1,edy=1;
                 var show_stat=1;
 
                 var sel_matrix=[];
@@ -155,6 +155,10 @@ const ExpWebview=forwardRef((props,ref)=>{
                 }
                 
                 var output_selected=function(){
+                    if(stx>edx||sty>edy){
+                        window.ReactNativeWebView.postMessage("ERR");
+                        return;
+                    }
                     var res=[];
                     for(var i=stx;i<=edx;i++)
                         for(var j=sty;j<=edy;j++){

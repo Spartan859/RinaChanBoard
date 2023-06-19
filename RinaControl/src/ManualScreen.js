@@ -25,7 +25,7 @@ var hei=16,len=18;
 function getExpSendStr(){
     return exp_all['eye_left'].toString()+','+exp_all['eye_right'].toString()
     +','+exp_all['cheek'].toString()
-    +','+exp_all['mouth'].toString()+',';
+    +','+exp_all['mouth'].toString()+','+exp_all['full_face']+',';
 }
 
 const setExp_ref=createRef();
@@ -90,6 +90,18 @@ export default function ManualScreen(){
     function ExpItem(catName,expId){
         //console.log(catName,expId);
         function PressHandler(){
+            if(catName!='full_face'){
+                setExp('full_face',exp_all['full_face'],0);
+                exp_all['full_face']=0;
+                setExp('full_face',exp_all['full_face'],1);
+            }else{
+                for(var catx in exp_all){
+                    if(catx=='full_face') continue;
+                    setExp(catx,exp_all[catx],0);
+                    exp_all[catx]=0;
+                    setExp(catx,exp_all[catx],1);
+                }
+            }
             setExp(catName,exp_all[catName],0);
             exp_all[catName]=expId;
             setExp(catName,exp_all[catName],1);

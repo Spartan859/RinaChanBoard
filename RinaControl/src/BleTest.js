@@ -47,12 +47,13 @@ export var exp_matrix_ori;
 export function upd_ExpMatrix(){
     getData('ExpMatrix').then((res)=>{
         if(res==null){
-            var exp_matrix_tmp=require('../assets/expressions.json');
-            storeData('ExpMatrix',JSON.stringify(exp_matrix_tmp));
+            exp_matrix_ori=require('../assets/expressions.json');
+            storeData('ExpMatrix',JSON.stringify(exp_matrix_ori));
+            sendInit();
         }else{
             exp_matrix_ori=JSON.parse(res);
+            sendInit();
         }
-        sendInit();
     });
 }
 export var UriList_ori={};
@@ -70,6 +71,8 @@ export function upd_UriList(){
     });
 }
 
+upd_ExpMatrix();
+upd_UriList();
 
 
 
@@ -88,8 +91,7 @@ export default function BleTest(){
     const [oflm,setOflm]=useState(false);
     getData('ssid').then((res)=>{if(res!=null&&ssid==null) setSSID(res)});
     getData('pwd').then((res)=>{if(res!=null&&pwd==null) setPWD(res)});
-    upd_ExpMatrix();
-    upd_UriList();
+    //upd_UriList();
     fetch('http://101.133.137.243:1101/RinaExpTxtFiles/').then((ulrt)=>{
         if(ulrt["ok"]==false&&!OfflineMode){
             OfflineMode=true;
