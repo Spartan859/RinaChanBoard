@@ -3,6 +3,9 @@ import {Text,TextInput,StyleSheet,TouchableOpacity,View, Alert,PermissionsAndroi
 import dgram from 'react-native-udp'
 import RNFS from 'react-native-fs'
 import { getData, storeData } from "./LocalDataStorage";
+import { OfflineMode } from "./BleTest";
+import { NetworkInfo } from "react-native-network-info";
+
 
 export function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
@@ -57,10 +60,17 @@ const sendUdpString=(msg,port,ip)=>{
 export const sendUdpDefault=(msg)=>{
     sendUdpString(msg,sendto_port,ipa_out);
 }
+async function getIP(){
+    var ip=await NetworkInfo.getIPV4Address();
+    console.log(ip);
+    return ip;
+}
 export const sendInit= async() => {
     //sendUdpString("test",sendto_port,ipa);
     //console.log(getLocalExpFile());
+    //if(OfflineMode==true) return;
     console.log("Sending Init!!!!!!!!!!!!!!");
+    if(!is_ip(await getIP())) return;
     let str=await getData('ExpMatrix');
     var yz=1400;
     sendUdpDefault('C');

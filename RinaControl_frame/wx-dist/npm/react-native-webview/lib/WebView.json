@@ -1,0 +1,11 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "WebView",
+		"WebView": "WebView"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

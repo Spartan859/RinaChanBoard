@@ -1,0 +1,12 @@
+{
+	"component": true,
+	"usingComponents": {
+		"ExpWebview": "./ExpWebview",
+		"_e": "AutoLive",
+		"AutoLive": "AutoLive"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

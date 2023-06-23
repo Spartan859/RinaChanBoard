@@ -1,0 +1,13 @@
+{
+	"component": true,
+	"usingComponents": {
+		"ExpWebview": "./ExpWebview",
+		"ScrollView": "/npm/@areslabs/wx-react-native/wxComponents/ScrollView/index",
+		"_e": "ManualScreen",
+		"WXButton": "/npm/@areslabs/wx-react-native/wxComponents/Button/index"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

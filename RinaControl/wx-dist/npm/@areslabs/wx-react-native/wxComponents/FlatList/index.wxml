@@ -1,0 +1,99 @@
+<wxs src="../commonwxs.wxs" module="tools" />
+<wxs module="methods">
+    var ArrayContains=function(arr,ele){
+        var find=false
+        for(var i=0; i < arr.length; i++){
+            if(ele == arr[i]){
+                find=true;
+                break;
+            }
+        }
+        return find;
+    }
+    module.exports = {
+        ArrayContains : ArrayContains,
+    }
+</wxs>
+
+<template name="flatList">
+    <scroll-view
+            bindscrolltoupper="onScrollToupper"
+            scroll-y="{{horizontal ? false : true}}"
+            scroll-x="{{horizontal ? true : false}}"
+            scroll-top="{{(onRefreshPassed && !horizontal) ? (sr ? 0: 80) : 0}}"
+            upper-threshold="3"
+            scroll-with-animation="{{withAni}}"
+            bindscroll="outScroll"
+            scroll-left="{{outLeft}}"
+            style="flex: 1; flex-basis: 0%;overflow:hidden;"
+            bindtouchstart='startTouch'
+            bindtouchend='leaveTouch'
+            bindscrolltolower="onEndReached"
+            lower-threshold="{{100}}"
+            scroll-into-view="{{index_id}}"
+    >
+        <view id="container" style="{{contentContainerStyle}}{{horizontal ? 'display: inline-block;white-space: nowrap;vertical-align: middle;' : ''}}min-height: calc(100% + {{onRefreshPassed ? 80 : 0}}px)">
+            <view
+                    wx:if="{{onRefreshPassed && !horizontal}}"
+                    style="height:80px;align-items:center;justify-content:center;"
+            >
+                <view class="loading"/>
+            </view>
+
+
+            <block wx:if="{{ListHeaderComponent && ListHeaderComponent._generic}}">
+                <_g
+
+                        diuu="{{ListHeaderComponent._generic}}"
+                        style="{{tools.getFinalStyle(ListHeaderComponent._genericstyle)}}{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}"
+                />
+            </block>
+
+            <block wx:if="{{ListEmptyComponent && ListEmptyComponent._generic}}">
+                <_g
+                        diuu="{{ListEmptyComponent._generic}}"
+                        style="{{tools.getFinalStyle(ListEmptyComponent._genericstyle)}}{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}"
+                />
+
+            </block>
+
+
+            <block wx:if="{{numColumns >= 2}}">
+                <view style="display: flex; flex-direction: row; justify-content: flex-start; flex-wrap: wrap;{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}">
+                    <view wx:for="{{renderItem}}" wx:key="key" style="width: {{100 / numColumns}}%">
+                        <_g id="id_{{index}}"
+                            diuu="{{item._generic}}"
+                            style="{{tools.getFinalStyle(item._genericstyle)}};"/>
+                    </view>
+                </view>
+            </block>
+            <block wx:else>
+                <block wx:for="{{renderItem}}" wx:key="key">
+                    <view wx:if="{{methods.ArrayContains(stickyHeaderIndices,index)}}" style="{{sti['stickyContainerStyle'+index]}}{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}">
+                        <_g id="id_{{index}}"
+                            diuu="{{item._generic}}"
+                            style="{{tools.getFinalStyle(item._genericstyle)}}{{sti['stickyStyle'+index]}}"/>
+                    </view>
+                    <block wx:else>
+                        <_g id="id_{{index}}"
+                            diuu="{{item._generic}}"
+                            style="{{tools.getFinalStyle(item._genericstyle)}}{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}"
+                        />
+                    </block>
+                </block>
+            </block>
+
+
+
+            <block wx:if="{{ListFooterComponent && ListFooterComponent._generic}}">
+                <_g
+                        diuu="{{ListFooterComponent._generic}}"
+                        style="{{tools.getFinalStyle(ListFooterComponent._genericstyle)}}{{horizontal ? 'display: inline-block;vertical-align: middle;' : ''}}"
+                />
+
+            </block>
+        </view>
+    </scroll-view>
+</template>
+
+<template is="flatList" data="{{..._r, withAni, outLeft, index_id, sr, sti}}"/>

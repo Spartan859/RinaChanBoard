@@ -1,0 +1,13 @@
+{
+	"component": true,
+	"usingComponents": {
+		"ImageBackground": "/npm/@areslabs/wx-react-native/wxComponents/ImageBackground/index",
+		"_e": "VideoPlayer",
+		"VideoPlayer": "VideoPlayer",
+		"WXVideo": "../react-native-video/Video"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

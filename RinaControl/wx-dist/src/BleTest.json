@@ -1,0 +1,14 @@
+{
+	"component": true,
+	"usingComponents": {
+		"DropDownPicker": "/npm/react-native-dropdown-picker/index",
+		"TextInput": "/npm/@areslabs/wx-react-native/wxComponents/TextInput/index",
+		"_e": "BleTest",
+		"WXSlider": "/npm/@miblanchard/react-native-slider/lib/index",
+		"WXButton": "/npm/@areslabs/wx-react-native/wxComponents/Button/index"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

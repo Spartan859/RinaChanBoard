@@ -1,0 +1,11 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "RenderBadgeItem",
+		"RenderBadge": "RenderBadgeItem"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

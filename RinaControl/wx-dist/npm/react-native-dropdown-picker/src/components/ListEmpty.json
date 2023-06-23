@@ -1,0 +1,11 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "ListEmpty",
+		"ListEmpty": "ListEmpty"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

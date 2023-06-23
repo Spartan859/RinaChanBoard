@@ -1,0 +1,13 @@
+{
+	"component": true,
+	"usingComponents": {
+		"ExpWebview": "./ExpWebview",
+		"DropDownPicker": "/npm/react-native-dropdown-picker/index",
+		"VideoPlayer": "/npm/react-native-video-controls/VideoPlayer",
+		"_e": "AutoLive"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

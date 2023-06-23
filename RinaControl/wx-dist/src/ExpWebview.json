@@ -1,0 +1,10 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "ExpWebview"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

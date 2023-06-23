@@ -9,6 +9,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { exp_matrix_ori } from "./BleTest";
 import { upd_ExpMatrix } from "./BleTest";
 import ViewShot from "react-native-view-shot";
+import { sendInit } from "./BasicFuntions";
 
 
 var exp_matrix=exp_matrix_ori;
@@ -28,7 +29,7 @@ export function ExportExp(event){
     console.log(toWhichCat);
     exp_matrix[toWhichCat].push(res);
     console.log("QOWIDASKNDLSAK"+JSON.stringify(exp_matrix)==JSON.stringify(exp_matrix_ori));
-    storeData('ExpMatrix',JSON.stringify(exp_matrix)).then(upd_ExpMatrix);
+    storeData('ExpMatrix',JSON.stringify(exp_matrix)).then(sendInit);
     UriList[toWhichCat][exp_matrix[toWhichCat].length-1]=curUri;
     storeData('UriList',JSON.stringify(UriList))//.then(upd_UriList);
 }

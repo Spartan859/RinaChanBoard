@@ -1,0 +1,15 @@
+{
+	"component": true,
+	"usingComponents": {
+		"TextInput": "/npm/@areslabs/wx-react-native/wxComponents/TextInput/index",
+		"FlatList": "/npm/@areslabs/wx-react-native/wxComponents/FlatList/index",
+		"ScrollView": "/npm/@areslabs/wx-react-native/wxComponents/ScrollView/index",
+		"Modal": "/npm/@areslabs/wx-react-native/wxComponents/Modal/index",
+		"_e": "Picker",
+		"WXPicker": "Picker"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

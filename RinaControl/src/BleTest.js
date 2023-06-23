@@ -49,10 +49,8 @@ export function upd_ExpMatrix(){
         if(res==null){
             exp_matrix_ori=require('../assets/expressions.json');
             storeData('ExpMatrix',JSON.stringify(exp_matrix_ori));
-            sendInit();
         }else{
             exp_matrix_ori=JSON.parse(res);
-            sendInit();
         }
     });
 }
@@ -114,7 +112,15 @@ export default function BleTest(){
         }).then(()=>{
             if(FWList[0]==null&&!OfflineMode) FetchFirmwareList().then((Tmp_List)=>{setFWList(Tmp_List);console.log(Tmp_List);})
         })
+    }).catch(function(err){
+        if(!OfflineMode){
+            OfflineMode=true;
+            setOflm(true);
+            Alert.alert("无法连接到服务器！","现在处于离线状态(除下载功能外可正常使用)");
+            return;
+        }
     })
+    
 
     //Connect the device and start monitoring characteristics
     async function connectDevice(device) {

@@ -1,0 +1,1 @@
+require("../_rn_");Component(wx.__bridge.WxNormalComp("src/ManualScreen"))

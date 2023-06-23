@@ -1,0 +1,11 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "RenderListItem",
+		"RenderListItem": "RenderListItem"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}

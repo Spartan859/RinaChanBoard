@@ -1,0 +1,1 @@
+Component(wx.__bridge.WxNormalComp())

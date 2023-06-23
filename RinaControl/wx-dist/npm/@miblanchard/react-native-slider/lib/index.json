@@ -1,0 +1,11 @@
+{
+	"component": true,
+	"usingComponents": {
+		"_e": "index",
+		"WXSlider": "index"
+	},
+	"componentGenerics": {
+		"_g": true
+	},
+	"disableScroll": true
+}
