@@ -1,16 +1,16 @@
 <!--index.wxml-->
 <view class="container">
     <text style="color: blue;font-size: larger;font-weight: bolder;">蓝牙配网</text>
-    <text style="font-size: small;">{{ble_msg}}</text>
-    <button style="font-size: small;" bindtap="startBLEsearch">先点我 连接至璃奈板</button>
+    <text style="font-size: small;">{{ble_status?"已连接":"蓝牙尚未连接成功"}}</text>
+    <button style="font-size: small;" bindtap="startBLEsearch">{{ble_status?"已连接":"先点我 连接至璃奈板"}}</button>
     <view class="weui-cells weui-cells_after-title">
         <view class="weui-cell weui-cell_input">
-            <input class="weui-input" bindinput="setWifiSSID" placeholder="输入wifi名称"/>
+            <input class="weui-input" bindinput="setWifiSSID" placeholder="输入wifi名称" value="{{wifi_ssid}}"/>
         </view>
         <view class="weui-cell weui-cell_input">
-            <input class="weui-input" bindinput="setWifiPWD" placeholder="输入wifi密码"/>
+            <input class="weui-input" bindinput="setWifiPWD" placeholder="输入wifi密码" value="{{wifi_pwd}}"/>
         </view>
     </view>
-    <button style="font-size: small;">发送WiFi信息</button>
-    <button style="font-size: small;">发送配置文件</button>
+    <button style="font-size: small;margin-bottom: 10px;" bindtap="sendWifiValue">发送WiFi信息</button>
+    <button style="font-size: small;" bindtap="prepareInit">发送配置文件</button>
 </view>

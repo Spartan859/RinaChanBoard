@@ -210,6 +210,7 @@ export default function BleTest(){
     }
 
     async function sendWifiValue(value) {
+        console.log("aklsdjlkw",base64.encode(value));
         await BLTManager.writeCharacteristicWithResponseForDevice(
             connectedDevice.id,
             SERVICE_UUID,

@@ -3,6 +3,16 @@
     "pages/index/index",
     "pages/logs/logs"
   ],
+  "tabBar": {
+    "list": [{
+      "pagePath": "pages/index/index",
+      "text": "蓝牙配网"
+    }, {
+      "pagePath": "pages/logs/logs",
+      "text": "日志"
+    }],
+    "position": "top"
+  },
   "window":{
     "backgroundTextStyle":"light",
     "navigationBarBackgroundColor": "#fff",
