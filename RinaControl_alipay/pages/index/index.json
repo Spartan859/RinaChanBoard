@@ -1,0 +1,7 @@
+{
+	"usingComponents": {
+		"btn": "../../__antmove/component/btn/btn",
+		"custom-input": "../../__antmove/component/custom-input/custom-input"
+	},
+	"component": true
+}

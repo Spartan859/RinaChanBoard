@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"base64-arraybuffer": "^1.0.2",
+		"weui-aliapp": "1.0.0"
+	}
+}
