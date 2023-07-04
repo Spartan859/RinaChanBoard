@@ -1,6 +1,7 @@
 <!--index.wxml-->
 <view class="container">
     <text style="color: blue;font-size: larger;font-weight: bolder;">蓝牙配网</text>
+    <text style="color: blue;font-size: larger;font-weight: bolder;">请先打开“位置信息”与“蓝牙”！</text>
     <text style="font-size: small;">{{ble_status?"已连接":"蓝牙尚未连接成功"}}</text>
     <button style="font-size: small;" bindtap="startBLEsearch">{{ble_status?"已连接":"先点我 连接至璃奈板"}}</button>
     <view class="weui-cells weui-cells_after-title">
@@ -13,4 +14,16 @@
     </view>
     <button style="font-size: small;margin-bottom: 10px;" bindtap="sendWifiValue">发送WiFi信息</button>
     <button style="font-size: small;" bindtap="prepareInit">发送配置文件</button>
+    <view class="row_box" style="width: 90%;">
+        <text>亮度：{{brightness}}</text>
+        <slider min="1" max="255" style="width: 70%;" value="{{brightness}}" bindchange="changeBrightness"></slider>
+    </view>
+    <view class="row_box">
+        <picker bindchange="changeBinVersion" value="{{BinVersion}}" range="{{BinList}}" class="picker_song">
+            <text>点按选择版本：{{BinList[BinVersion]}}</text>
+        </picker>
+    </view>
+    <button style="font-size: small;" bindtap="sendOTA">发送固件更新指令</button>
+    
+    
 </view>

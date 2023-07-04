@@ -1,16 +1,16 @@
 {
   "pages":[
     "pages/index/index",
-    "pages/logs/logs"
+    "pages/ManualScreen/ManualScreen"
   ],
   "tabBar": {
     "list": [{
       "pagePath": "pages/index/index",
       "text": "蓝牙配网"
-    }, {
-      "pagePath": "pages/logs/logs",
-      "text": "日志"
-    }],
+    },{
+        "pagePath": "pages/ManualScreen/ManualScreen",
+        "text": "发送表情"
+      }],
     "position": "top"
   },
   "window":{
@@ -25,5 +25,6 @@
     "kbone": true,
     "weui": true
   },
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "requiredBackgroundModes": ["audio"]
 }

@@ -1,0 +1,41 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {}
+		},
+		{
+			"path": "pages/logs/logs",
+			"style": {
+				"navigationBarTitleText": "查看启动日志"
+			}
+		}
+	],
+	"tabBar": {
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "蓝牙配网"
+			},
+			{
+				"pagePath": "pages/logs/logs",
+				"text": "日志"
+			}
+		],
+		"position": "top"
+	},
+	"style": "v2",
+	"sitemapLocation": "sitemap.json",
+	"useExtendedLib": {
+		"kbone": true,
+		"weui": true
+	},
+	"lazyCodeLoading": "requiredComponents",
+	"globalStyle": {
+		"backgroundTextStyle": "light",
+		"navigationBarBackgroundColor": "#fff",
+		"navigationBarTitleText": "RinaControl",
+		"navigationBarTextStyle": "black"
+	},
+	"subPackages": []
+}

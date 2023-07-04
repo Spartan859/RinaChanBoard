@@ -1,0 +1,69 @@
+<!--pages/ManualScreen/ManualScreen.wxml-->
+<view class="container">
+    <canvas type="2d" id="ExpCanvas" style="width:90%;height: {{canvas_height+'px'}};" bindtap="HandlePixelTap">
+    </canvas>
+    <block wx:if="{{display_mode==0}}">
+        <scroll-view class="scroll-view_H" scroll-x="true" style="width: 90%;">
+          <block wx:for="{{expMa['eye_left']}}" wx:for-index="idx" >
+            <view data-catName="eye_left" data-id="{{idx}}" bindtap="pressHandler" class="scroll-view-item_H">
+                <image mode="aspectFit" class="image_in_scroll" style="{{'width: '+image_len+'px;height: '+image_len+'px'}}" src="{{'https://autosz.satintin.com/images/eye_left'+idx+'.png'}}"></image>
+            </view>
+          </block>
+        </scroll-view>
+        <scroll-view class="scroll-view_H" scroll-x="true" style="width: 90%;">
+          <block wx:for="{{expMa['eye_right']}}" wx:for-index="idx" >
+            <view data-catName="eye_right" data-id="{{idx}}" bindtap="pressHandler" class="scroll-view-item_H">
+                <image mode="aspectFit" class="image_in_scroll" style="{{'width: '+image_len+'px;height: '+image_len+'px'}}" src="{{'https://autosz.satintin.com/images/eye_right'+idx+'.png'}}"></image>
+            </view>
+          </block>
+        </scroll-view>
+        <scroll-view class="scroll-view_H" scroll-x="true" style="width: 90%;">
+          <block wx:for="{{expMa['cheek']}}" wx:for-index="idx" >
+            <view data-catName="cheek" data-id="{{idx}}" bindtap="pressHandler" class="scroll-view-item_H">
+                <image mode="aspectFit" class="image_in_scroll" style="{{'width: '+image_len+'px;height: '+image_len+'px'}}" src="{{'https://autosz.satintin.com/images/cheek'+idx+'.png'}}"></image>
+            </view>
+          </block>
+        </scroll-view>
+        <scroll-view class="scroll-view_H" scroll-x="true" style="width: 90%;">
+          <block wx:for="{{expMa['mouth']}}" wx:for-index="idx" >
+            <view data-catName="mouth" data-id="{{idx}}" bindtap="pressHandler" class="scroll-view-item_H">
+                <image mode="aspectFit" class="image_in_scroll" style="{{'width: '+image_len+'px;height: '+image_len+'px'}}" src="{{'https://autosz.satintin.com/images/mouth'+idx+'.png'}}"></image>
+            </view>
+          </block>
+        </scroll-view>
+        <view class="row_box">
+            <checkbox-group bindchange="setSyncLR">
+                <checkbox/>
+            </checkbox-group>
+            <text>同步左右眼</text>
+            <button bindtap="sendExpString">发送</button>
+        </view>
+        <button bindtap="setDisplayMode" style="margin-top:10px">切换到音乐同步</button>
+    </block>
+    
+    
+</view>
+<block wx:if="{{display_mode==1}}">
+    <view class="row_box">
+        <picker bindchange="ChangeSong" value="{{curSongIndex}}" range="{{SongList}}" class="picker_song">
+            <text>点按选择歌曲：{{SongList[curSongIndex]}}</text>
+        </picker>
+    </view>
+    <view class="row_box">
+        <text class="time time-l">{{currentSecond}}</text>
+        <view class="progress-bar-wrapper" style="width: 80%;">
+            <slider bindchanging="sliderChangeing" bindchange="sliderChange"  min="0" max="{{curduration}}" value="{{curSecond}}" activeColor="#F91C55"  block-size="18" />
+        </view>
+        <text class="time time-r">{{duration}}</text>
+    </view>
+    <view class="row_box">
+        <button bindtap="toggle_play" style="width: auto;">
+            <mp-icon icon="{{show?'pause':'play'}}" size="{{25}}"></mp-icon>
+        </button>
+    </view>
+    <button bindtap="setDisplayMode" style="margin-top:10px">切换到手动模式</button>
+</block>
+
+
+
+    

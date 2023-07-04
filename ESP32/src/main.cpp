@@ -1,6 +1,6 @@
 #include <Arduino.h>
 //宏定义，如果要用Adafruit_NeoPixel版本的，就把下面这行注释掉
-//#define __Enable_FastLED
+#define __Enable_FastLED
 #define LED_PIN 12
 #define NUM_LEDS 269
 //
@@ -30,9 +30,12 @@
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
 
+unsigned long previousMillis = 0;
+unsigned long interval = 3000;
+
 //#define LED_PIN 12
 
-const int versionArray[]={0,0,4};
+const int versionArray[]={0,0,5};
 
 String ssid="wifi_name",password="wifi_pwd";
 
@@ -301,6 +304,7 @@ void loop() {
                 //Serial.println(expTxt);
             }else if(buf[0]=='B'){
                 deserializeJson(expJSON,expTxt);
+                Serial.println(expTxt.length());
                 //Serial.println(expTxt);
                 if((int)expJSON["mouth"][2][2]>0){
                     for(int i=0;i<5;i++){
@@ -335,6 +339,14 @@ void loop() {
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);
         }
+    }
+    unsigned long currentMillis = millis();
+    if (WifiStarted&&(!Updating)&&(WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >=interval)) {
+        Serial.print(millis());
+        Serial.println("Reconnecting to WiFi...");
+        WiFi.disconnect();
+        WiFi.reconnect();
+        previousMillis = currentMillis;
     }
 }
 

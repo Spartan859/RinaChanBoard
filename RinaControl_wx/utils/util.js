@@ -123,6 +123,22 @@ export const sendInit=async ()=>{
     }
     sendUdpDefault('B');
 }
+async function sendTxt(live_name){
+    console.log("Sending Txt "+live_name);
+    let str=JSON.stringify(wx.getStorageSync(live_name))
+    console.log(wx.getStorageSync(live_name))
+    var yz=1400;
+    sendUdpDefault('L');
+    await sleep(300);
+    for(var i=0;i<str.length;i+=yz){
+        console.log("sending pack");
+        //console.log(str.substr(i,yz));
+        sendUdpDefault('K'+str.substr(i,yz));
+        await sleep(300);
+    }
+    sendUdpDefault('J');
+}
+
 
 module.exports = {
   formatTime,
@@ -131,5 +147,6 @@ module.exports = {
   sendUdpDefault,
   resetipa,
   sleep,
-  ipa_out
+  ipa_out,
+  sendTxt
 }

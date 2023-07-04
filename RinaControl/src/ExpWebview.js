@@ -21,7 +21,7 @@ const ExpWebview=forwardRef((props,ref)=>{
         //console.log(exp_matrix[catName][expId])
         expId=parseInt(expId);
         for(var i in exp_matrix[catName][expId]){
-            pixel_id=exp_matrix[catName][expId][i];
+            let pixel_id=exp_matrix[catName][expId][i];
             setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
         }
         //console.log(screen.width);
