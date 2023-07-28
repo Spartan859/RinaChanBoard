@@ -1,0 +1,2 @@
+<canvas type="2d" id="ExpCanvas" style="width: 100%; height: {{canvas_height+'px'}};" bindtap="HandlePixelTap">
+    </canvas>

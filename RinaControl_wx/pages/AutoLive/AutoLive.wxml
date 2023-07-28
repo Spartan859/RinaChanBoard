@@ -1,0 +1,24 @@
+<!--pages/AutoLive/AutoLive.wxml-->
+<view class="container">
+    <ExpView style="width: 90%;" id="ExpViewB"></ExpView>
+</view>
+<block>
+    <view class="row_box">
+        <picker bindchange="ChangeSong" value="{{curSongIndex}}" range="{{SongList}}" class="picker_song">
+            <text>点按选择歌曲：{{SongList[curSongIndex]}}</text>
+        </picker>
+    </view>
+    <view class="row_box">
+        <text class="time time-l">{{currentSecond}}</text>
+        <view class="progress-bar-wrapper" style="width: 80%;">
+            <slider bindchanging="sliderChangeing" bindchange="sliderChange"  min="0" max="{{curduration}}" value="{{curSecond}}" activeColor="#F91C55"  block-size="18" />
+        </view>
+        <text class="time time-r">{{duration}}</text>
+    </view>
+    <view class="row_box">
+        <button bindtap="toggle_play" style="width: auto;">
+            <mp-icon icon="{{show?'pause':'play'}}" size="{{25}}"></mp-icon>
+        </button>
+    </view>
+    <button bindtap="ClearSongTxt" style="margin-top:10px">清空歌曲缓存</button>
+</block>

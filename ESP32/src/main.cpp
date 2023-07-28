@@ -37,7 +37,7 @@ unsigned long interval = 3000;
 
 const int versionArray[]={0,0,5};
 
-String ssid="wifi_name",password="wifi_pwd";
+String ssid="hoshizora",password="zteztezte";
 
 //Network
 AsyncUDP Udp;
@@ -281,10 +281,28 @@ void setup() {
     //SerialBT.end();
     }
     //StartBLE
-    //StartWifi();
-    StartBLE();
+    StartWifi();
+    //StartBLE();
 }
-
+bool allwords[16][16*50+5];
+void AppendWord(String hexstr){
+	Serial.println(hexstr);
+	char tmpbuf[5];
+	memset(tmpbuf,0,sizeof(tmpbuf));
+    for(int i=0;i<hexstr.length();i+=4){
+		tmpbuf[0]=hexstr[i];tmpbuf[1]=hexstr[i+1];
+		int code1=strtol(tmpbuf,0,16);
+		tmpbuf[0]=hexstr[i+2];tmpbuf[1]=hexstr[i+3];
+		int code2=strtol(tmpbuf,0,16);
+        int tmp_code=(code1<<8)|code2;
+        for(int j=15;j>=0;j--){
+			if((tmp_code>>j)&1){
+                Serial.print('*');
+            }else Serial.print('.');
+        }
+		Serial.println();
+    }
+}
 
 
 void loop() {
@@ -335,6 +353,9 @@ void loop() {
                 Brightness=atoi(BrtnsStr.c_str());
                 setLedBrightness(Brightness);
                 showFrame();
+            }else if(buf[0]=='T'){
+                String bufstr_tmp=buf+1;
+                AppendWord(bufstr_tmp);
             }
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);

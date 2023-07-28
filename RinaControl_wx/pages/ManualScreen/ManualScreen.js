@@ -1,159 +1,103 @@
 // pages/ManualScreen/ManualScreen.js
 import {IndexExport} from '../index/index'
-import {sleep,sendUdpDefault,sendTxt} from '../../utils/util'
+import {sleep,sendUdpDefault,sendTxt, sendInit} from '../../utils/util'
 console.log(IndexExport.exp_matrix);
+
+var ExpViewA;
 const FPS=10;
-var ExpContent={};
-var lastFrame=-1;
 
-
-var canvas,ctx;
-var len=18,hei=16;
-var blk_len;
 var syncLR=false;
 
+var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0,"full_face":0};
+var exp_init_num={"eye_left":21,"eye_right":21,"cheek":16,"mouth":18,"full_face":0};
+const exp_order={"eye_left":0,"eye_right":1,"cheek":3,"mouth":2,"full_face":4};
+const catIdList=['eye_left','eye_right','cheek','mouth','full_face'];
+
+var image_uri_list={};
+
+var thispage;
+
+var sending_Init=false;
+
+var USER_exp_matrix={};
+var USER_image_uri_list={};
+
+for(var catName in exp_all){
+    USER_exp_matrix[catName]=[];
+    USER_image_uri_list[catName]=[];
+}
+
+
+var len=18,hei=16;
 var id_matrix=JSON.parse(`
     [{"0":-1,"1":-1,"2":38,"3":39,"4":70,"5":71,"6":102,"7":103,"8":134,"9":135,"10":166,"11":167,"12":198,"13":199,"14":230,"15":231,"16":-1,"17":-1},{"0":-1,"1":10,"2":37,"3":40,"4":69,"5":72,"6":101,"7":104,"8":133,"9":136,"10":165,"11":168,"12":197,"13":200,"14":229,"15":232,"16":259,"17":-1},{"0":9,"1":11,"2":36,"3":41,"4":68,"5":73,"6":100,"7":105,"8":132,"9":137,"10":164,"11":169,"12":196,"13":201,"14":228,"15":233,"16":258,"17":260},{"0":8,"1":12,"2":35,"3":42,"4":67,"5":74,"6":99,"7":106,"8":131,"9":138,"10":163,"11":170,"12":195,"13":202,"14":227,"15":234,"16":257,"17":261},{"0":7,"1":13,"2":34,"3":43,"4":66,"5":75,"6":98,"7":107,"8":130,"9":139,"10":162,"11":171,"12":194,"13":203,"14":226,"15":235,"16":256,"17":262},{"0":6,"1":14,"2":33,"3":44,"4":65,"5":76,"6":97,"7":108,"8":129,"9":140,"10":161,"11":172,"12":193,"13":204,"14":225,"15":236,"16":255,"17":263},{"0":5,"1":15,"2":32,"3":45,"4":64,"5":77,"6":96,"7":109,"8":128,"9":141,"10":160,"11":173,"12":192,"13":205,"14":224,"15":237,"16":254,"17":264},{"0":4,"1":16,"2":31,"3":46,"4":63,"5":78,"6":95,"7":110,"8":127,"9":142,"10":159,"11":174,"12":191,"13":206,"14":223,"15":238,"16":253,"17":265},{"0":3,"1":17,"2":30,"3":47,"4":62,"5":79,"6":94,"7":111,"8":126,"9":143,"10":158,"11":175,"12":190,"13":207,"14":222,"15":239,"16":252,"17":266},{"0":2,"1":18,"2":29,"3":48,"4":61,"5":80,"6":93,"7":112,"8":125,"9":144,"10":157,"11":176,"12":189,"13":208,"14":221,"15":240,"16":251,"17":267},{"0":1,"1":19,"2":28,"3":49,"4":60,"5":81,"6":92,"7":113,"8":124,"9":145,"10":156,"11":177,"12":188,"13":209,"14":220,"15":241,"16":250,"17":268},{"0":0,"1":20,"2":27,"3":50,"4":59,"5":82,"6":91,"7":114,"8":123,"9":146,"10":155,"11":178,"12":187,"13":210,"14":219,"15":242,"16":249,"17":269},{"0":-1,"1":21,"2":26,"3":51,"4":58,"5":83,"6":90,"7":115,"8":122,"9":147,"10":154,"11":179,"12":186,"13":211,"14":218,"15":243,"16":248,"17":-1},{"0":-1,"1":22,"2":25,"3":52,"4":57,"5":84,"6":89,"7":116,"8":121,"9":148,"10":153,"11":180,"12":185,"13":212,"14":217,"15":244,"16":247,"17":-1},{"0":-1,"1":23,"2":24,"3":53,"4":56,"5":85,"6":88,"7":117,"8":120,"9":149,"10":152,"11":181,"12":184,"13":213,"14":216,"15":245,"16":246,"17":-1},{"0":-1,"1":-1,"2":-1,"3":54,"4":55,"5":86,"6":87,"7":118,"8":119,"9":150,"10":151,"11":182,"12":183,"13":214,"14":215,"15":-1,"16":-1,"17":-1}]
     `);
 var id_to_coordinate=[[],[]];
-
-var sel_matrix=[];
-for(var i=0;i<100;i++) sel_matrix[i]=new Array(100).fill(0);
-
-var exp_all={"eye_left":0,"eye_right":0,"cheek":0,"mouth":0,"full_face":0};
-const exp_order={"eye_left":0,"eye_right":1,"cheek":3,"mouth":2,"full_face":4};
-
 for(var i=0;i<hei;i++)
     for(var j=0;j<len;j++){
         id_to_coordinate[0][id_matrix[i][j]]=i+1;
         id_to_coordinate[1][id_matrix[i][j]]=j+1;
     }
 
-var SongLinkList=[]
-var thispage;
-var curSongid=0;
-
-function format(t) {
-    let time = Math.floor(t / 60) >= 10 ? Math.floor(t / 60) : '0' + Math.floor(t / 60)
-    t = time + ':' + ((t % 60) / 100).toFixed(2).slice(-2)
-    return t
-}
-
-function findLast(FL,cF){
-    //console.log(cF)
-    let l=0,r=FL.length-1,mid=0,ans=0;
-    while(l<=r){
-        mid=Math.floor(l+(r-l)/2);
-        if(FL[mid]>cF){
-            r=mid-1;
-        }else{
-            ans=mid;
-            l=mid+1;
+async function getImageTobase64_url(tempFilePath) {
+    const base64 = await new Promise(resolve => {
+        wx.request({
+        url: tempFilePath,
+        responseType: 'arraybuffer', //关键的参数，设置返回的数据格式为arraybuffer
+        success: res => {
+            //把arraybuffer转成base64
+            let data = wx.arrayBufferToBase64(res.data);
+            return resolve(('data:image/jpeg;base64,' + data));
         }
-    }
-    //console.log(ans)
-    return FL[ans];
+        });
+    });
+    return base64;
 }
-
 Page({
 
     /**
      * 页面的初始数据
      */
     data: {
-        canvas_height: 1284,
-        display_mode: 0,//0: 手动 1: 自动
         expMa: {},
-        image_len: wx.getSystemInfoSync().screenHeight*75/1027,
-        duration: "10:00",
-        currentTime: "00:00",
-        show: false,
-        curSecond: 0,
-        curduration: 0,
-        currentSecond: "00:00",
-        SongList: [],
-        curSongIndex: 0,
+        image_len: wx.getSystemInfoSync().screenHeight*65/1027,
+        CatList: ["左眼","右眼","脸颊","嘴巴","全脸"],
+        curCatIndex: 0,
+        imageUri: {}
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
-    onLoad(options) {
+    async onLoad(options) {
         //console.log(IndexExport.exp_matrix);
+        let Uem_tmp=wx.getStorageSync('USER_exp_matrix');
+        if(Uem_tmp!='') USER_exp_matrix=Uem_tmp;
+        let Uim_tmp=wx.getStorageSync('USER_image_uri_list');
+        if(Uim_tmp!='') USER_image_uri_list=Uim_tmp;
+
         thispage=this;
-        this.setData({expMa: IndexExport.exp_matrix});
-        this.audioCtx=wx.getBackgroundAudioManager();
-        //this.startPlaying();
-        this.watchAudio();
-        this.StartProgressMonitor();
-        //下载列表
-        wx.request({
-            url: 'https://autosz.satintin.com/RinaExpTxtFiles/',
-            success(res){
-                let tmpArray=[]
-                for(var i in res.data){
-                    let tmpstr=res.data[i].name
-                    
-                    tmpArray[i]=tmpstr.substring(0,tmpstr.length-4);
-                    thispage.DownloadLive(tmpArray[i]);
-                    console.log(tmpArray[i]);
-                    SongLinkList[i]='https://autosz.satintin.com/'+tmpArray[i];
+        let im_tmp=wx.getStorageSync('image_uri_list');
+        if(im_tmp!='') image_uri_list=im_tmp;
+        else{
+            for(var catName in exp_all){
+                image_uri_list[catName]=[];
+                for(var i=0;i<=exp_init_num[catName];i++){
+                    image_uri_list[catName][i]=await getImageTobase64_url('https://autosz.satintin.com/images/'+catName+i+'.png')
+                    //console.log(image_uri_list[catName][i]);
                 }
-                thispage.setData({SongList: tmpArray});
-                
+                image_uri_list[catName]=image_uri_list[catName].concat(USER_image_uri_list[catName]);
             }
-          })
+        }
+        this.setData({expMa: IndexExport.exp_matrix,imageUri: image_uri_list});
     },
-
-    startPlaying(){
-        this.audioCtx.src=SongLinkList[curSongid]
-        this.audioCtx.title=this.data.SongList[curSongid];
-        var SongSel=this.data.SongList[curSongid];
-        //console.log(ExpContent[SongSel]['FrameList'])
-        //this.audioCtx.play();
-    },
-
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady() {
-        wx.createSelectorQuery().select('#ExpCanvas').fields({node:true,size:true}).exec((res)=>{
-            canvas=res[0].node;
-            ctx=canvas.getContext('2d');
-            const dpr = wx.getSystemInfoSync().pixelRatio
-            canvas.width = res[0].width * dpr
-            canvas.height = res[0].width * dpr*hei/len
-            ctx.scale(dpr, dpr)
-            blk_len=canvas.width/len/dpr;
-            console.log(canvas.height);
-            this.setData({canvas_height:canvas.height/dpr});
-            //ctx.fillRect(0,0,1000,1000);
-            this.drawBlock();
-        }) 
-        console.log("askdhqjw",wx.getSystemInfoSync().screenHeight)
+        ExpViewA=this.selectComponent('#ExpViewA');
+        console.log(ExpViewA)
       },
-
-    drawBlock(){
-
-        for(var i=0;i<hei;i++){
-            for(var j=0;j<len;j++){
-                ctx.rect(j*blk_len,i*blk_len,blk_len,blk_len);
-            }
-        }
-        ctx.stroke();
-    },
-
-    setPixel(x,y,type){
-        console.log(x,y);
-        sel_matrix[x][y]=type;
-        if(type==1){
-            ctx.fillStyle = 'rgba(255, 0, 0, 1)';
-            ctx.fillRect((y-1)*blk_len+0.8,(x-1)*blk_len+0.8,blk_len-1.3,blk_len-1.3);
-        }else{
-            ctx.clearRect((y-1)*blk_len+0.8,(x-1)*blk_len+0.8,blk_len-1.3,blk_len-1.3);
-        }     
-
-    },
     getExpSendStr(){
         return exp_all['eye_left'].toString()+','+exp_all['eye_right'].toString()
         +','+exp_all['cheek'].toString()
@@ -161,17 +105,18 @@ Page({
     },
     setExp(catName,expId,tp){
         //console.log(exp_matrix[catName][expId])
+        //ExpViewA=this.selectComponent('#ExpViewA');
+        //console.log(ExpViewA)
         expId=parseInt(expId);
         for(var i in IndexExport.exp_matrix[catName][expId]){
             let pixel_id=IndexExport.exp_matrix[catName][expId][i];
-            this.setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
+            ExpViewA.setPixel(id_to_coordinate[0][pixel_id],id_to_coordinate[1][pixel_id],tp);
         }
     },
     pressHandler(event){
-        console.log(event);
+        //console.log(this.data.canvas_height)
         let catName=event.currentTarget.dataset.catname;
         let expId=event.currentTarget.dataset.id;
-        console.log(catName,expId);
         if(catName!='full_face'){
             this.setExp('full_face',exp_all['full_face'],0);
             exp_all['full_face']=0;
@@ -201,168 +146,88 @@ Page({
         }
     },
     sendExpString(){
+        if(sending_Init){
+            wx.showModal({
+              title: '璃奈很忙！',
+              content: '璃奈电波发送中，请稍后再操作！'
+            })
+            return;
+        }
         console.log('e'+this.getExpSendStr());
         sendUdpDefault('e'+this.getExpSendStr());
     },
     setSyncLR(event){
         syncLR^=1;
     },
-    setDisplayMode(){
-        this.setData({display_mode:this.data.display_mode^1})
-    },
-    sliderChangeing:function(e){
-    // 在滑动滚动条的时候，暂停播放
-        this.pause();
-        let time =e.detail.value;
-    //通过 this.audioCtx.seek 将音频跳转至当前时间
-        this.audioCtx.seek(time)
-    // 修改 显示的 值 重新赋值
-        this.setData({
-        curSecond:time,
-        currentSecond:format(time)
+  longpressHandler(event){
+    let catName=event.currentTarget.dataset.catname;
+    let expId=event.currentTarget.dataset.id;
+    if(expId<=exp_init_num[catName]){
+        wx.showModal({
+          title: '无法删除表情',
+          content: '初始表情不能删除！'
         })
-    },
-    sliderChange:function(e){
-        this.play()
-    },
-    progressMonitor(cT){
-        if(cT==undefined) return;
-        if(!this.audioCtx.paused&&!this.data.show) this.pause();
-        var curFrame=cT*FPS;
-        //console.log(curFrame)
-        var SongSel=this.data.SongList[curSongid];
-        //console.log(ExpContent[SongSel]);
-        if(ExpContent[SongSel]==undefined) return;
-        //console.log(ExpContent[SongSel])
-        if(ExpContent[SongSel]['FrameList']==undefined) return;
-        var nowFrame=findLast(ExpContent[SongSel]['FrameList'],curFrame);
-        //console.log(nowFrame)
-        if(nowFrame==lastFrame) return;
-        lastFrame=nowFrame;
-        //console.log(curFrame,nowFrame);
-        var exp_nowFrame=ExpContent[SongSel][nowFrame];
-        for(var catName in exp_all){
-            //console.log(catName);
-            if(exp_nowFrame[exp_order[catName]]=='-1') continue;
-            this.setExp(catName,exp_all[catName],0);
-            exp_all[catName]=exp_nowFrame[exp_order[catName]];
-            this.setExp(catName,exp_all[catName],1);
-            //if(catName=='cheek') console.log(exp_all[catName]);
-        }
-        sendUdpDefault('e'+this.getExpSendStr());
-    },
-
-    // 时间格式化
-// 监听 歌曲播放时间
-  watchAudio: function () {
-    this.audioCtx.onTimeUpdate(() => {
-    // 拿取当前音频的总时长 带小数 转换成整数 放在slider：max="{{curduration}}"
-      this.data.curduration = Math.ceil(this.audioCtx.duration);
-    // 将音频总时长 换成"04:18" 格式显示 
-      this.data.duration = format(this.data.curduration);
-      
-   // 拿取当前音频的播放时间 slider: value="{{curSecond}}"
-      this.data.curSecond = Math.ceil(this.audioCtx.currentTime);
-    // 将当前音频的播放时间 换成"04:18" 格式显示
-      this.data.currentSecond = format(this.audioCtx.currentTime);
-    // 将拿到的 数据 赋值给 显示的数据
-      this.setData({
-        curduration: this.data.curduration,
-        duration: this.data.duration,
-        curSecond: this.data.curSecond,
-        currentSecond: this.data.currentSecond
-      })
-    })
-    this.audioCtx.onEnded(()=>{
-        this.startPlaying();
-    })
-    this.audioCtx.onPlay(()=>{
-        console.log("played")
-
-    })
-  },
-  play: function () {
-    if (this.data.show == false) {
-      this.setData({
-        // 切换 播放 和 暂停 按钮
-        show: !this.data.show
-      })
-    }
-    this.audioCtx.play()
-
-  },
-// 暂停功能
-  pause: function () {
-    this.setData({
-        show: false
-      })
-      this.audioCtx.pause()
-  },
-  toggle_play(){
-      //console.log("asdhjqjkwhedkas")
-    if (this.data.show == false) {
-        if(this.audioCtx.src==undefined) this.startPlaying()
-        else this.audioCtx.play()
-        //console.log("yes")
-      }else{
-        this.audioCtx.pause()
-        //console.log("no")
-      }
-    this.setData({
-    // 切换 播放 和 暂停 按钮
-        show: !this.data.show
-    })
-  },
-ChangeSong(event){
-      curSongid=event.detail.value
-    this.audioCtx.src=SongLinkList[curSongid];
-    this.audioCtx.title=this.data.SongList[curSongid];
-    console.log(this.audioCtx.src);
-
-    lastFrame=-1;
-    this.setData({curSongIndex: event.detail.value})
-    
-  },
-  DownloadLive(live_name){
-      var tmpContent=wx.getStorageSync(live_name)
-    if(tmpContent!=''){
-        ExpContent[live_name]=tmpContent;
         return;
     }
-    console.log("Downloading ",live_name);
-    wx.request({
-      url: 'https://autosz.satintin.com/RinaExpTxtFiles/'+live_name+'.txt',
-      success(res){
-        var str=res.data;
-        var ExpFile={};
-        ExpFile['FrameList']=[];
-        var all_Lines=str.trim().split('\n');
-        for(var j in all_Lines){
-            //console.log(j);
-            ExpFile['FrameList'][j]=parseInt(all_Lines[j].split('!')[0]);
-            var tttmp=all_Lines[j].split('!')[1].split(',');
-            tttmp.push("0");
-            ExpFile[parseInt(all_Lines[j].split('!')[0])]=tttmp;
+    wx.showModal({
+      title: '删除表情',
+      content: '是否要删除此表情？',
+      complete: (res) => {
+        if (res.confirm) {
+          this.deleteExp(catName,expId);
         }
-        //ExpFile=JSON.stringify(ExpFile);
-        wx.setStorageSync(live_name, ExpFile);
-        ExpContent[live_name]=ExpFile;
       }
     })
   },
-  StartProgressMonitor(){
-    setInterval(()=>{
-        this.progressMonitor(this.audioCtx.currentTime);
-    },50)
+  ChangeCat(event){
+    this.setData({curCatIndex: event.detail.value});
   },
-  TestFL(){
-    var SongSel=this.data.SongList[curSongid];
-    return findLast(ExpContent[SongSel]['FrameList'],106);
+  ExportTo(){
+      sending_Init=true;
+      var SelList=ExpViewA.output_all();
+      var catName=catIdList[this.data.curCatIndex];
+      IndexExport.exp_matrix[catName].push(SelList);
+      USER_exp_matrix[catName].push(SelList);
+
+      var tmp_uri=ExpViewA.getImageUri();
+      image_uri_list[catName].push(tmp_uri);
+      USER_image_uri_list[catName].push(tmp_uri);
+
+      console.log(IndexExport.exp_matrix);
+
+      wx.setStorageSync('ExpMatrix', IndexExport.exp_matrix);
+      wx.setStorageSync('image_uri_list', image_uri_list);
+      wx.setStorageSync('USER_exp_matrix', USER_exp_matrix);
+      wx.setStorageSync('USER_image_uri_list', USER_image_uri_list);
+
+      this.setData({expMa: IndexExport.exp_matrix,imageUri: image_uri_list});
+      sendInit().then(()=>{sending_Init=false});
   },
-  HandlePixelTap(event){
-    let x=event.detail.x,y=event.detail.y;
-    let cor_x=Math.floor(y/blk_len)+1,cor_y=Math.floor(x/blk_len);
-    this.setPixel(cor_x,cor_y,sel_matrix[cor_x][cor_y]^1);
+  deleteExp(catName,expId){
+    sending_Init=true;
+    if(exp_all[catName]==expId){ 
+        exp_all[catName]=0;
+        this.setExp(catName,expId,0);
+        this.sendExpString();
+    }
+    IndexExport.exp_matrix[catName].splice(expId,1);
+    image_uri_list[catName].splice(expId,1);
+    USER_exp_matrix[catName].splice(expId-exp_init_num[catName],1);
+    USER_image_uri_list[catName].splice(expId-exp_init_num[catName],1);
+
+    wx.setStorageSync('ExpMatrix', IndexExport.exp_matrix);
+    wx.setStorageSync('image_uri_list', image_uri_list);
+    wx.setStorageSync('USER_exp_matrix', USER_exp_matrix);
+    wx.setStorageSync('USER_image_uri_list', USER_image_uri_list);
+    this.setData({expMa: IndexExport.exp_matrix,imageUri: image_uri_list});
+    
+    sendInit().then(()=>{sending_Init=false});
+},
+  EraseExpView(){
+      for(var catName in exp_all){
+          exp_all[catName]=0;
+      }
+      ExpViewA.erase_all();
   }
 })
 

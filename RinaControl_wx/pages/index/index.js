@@ -2,6 +2,7 @@
 // 获取应用实例
 import {ipa_out,sendInit,resetipa,sleep, sendUdpDefault} from '../../utils/util'
 console.log(ipa_out.ip);
+
 const app = getApp()
 
 const str2ab=require('../../utils/util.js').stringToHexBuffer
@@ -19,6 +20,10 @@ var deviceId;
 var thispage;
 
 var searchingBLE=false;
+
+var dzk_ready=false;
+
+import {get_gbk_offset,read_char} from '../../utils/getCharPic'
 
 
 Page({
@@ -42,7 +47,7 @@ Page({
         console.log(deviceId);
         wx.setStorageSync('ssid', this.data.wifi_ssid);
         wx.setStorageSync('pwd', this.data.wifi_pwd);
-        if(deviceId==undefined){
+        if(!this.data.ble_status){
             if(ipa_out.ip!='null'){
                 wx.showModal({
                   title: "蓝牙未连接",
@@ -114,7 +119,14 @@ Page({
         //console.log(ExpMatrixInit)
         IndexExport.exp_matrix=wx.getStorageSync('ExpMatrix');
         if(IndexExport.exp_matrix==''){
+            console.log("KHQWJDSAHAKJHKj");
             IndexExport.exp_matrix=ExpMatrixInit;
+            var USER_exp=wx.getStorageSync('USER_exp_matrix');
+            if(USER_exp!=''){
+                for(var catName in ExpMatrixInit){
+                    IndexExport.exp_matrix[catName]=IndexExport.exp_matrix[catName].concat(USER_exp[catName]);
+                }
+            }
             wx.setStorageSync('ExpMatrix', IndexExport.exp_matrix);
         }
     },
@@ -126,33 +138,6 @@ Page({
         console.log(this.data.wifi_ssid);
     },
     onLoad: function(options){
-        wx.getSetting({
-            success(res) {
-                console.log(res.authSetting)
-                //判断是否有'scope.bluetooth'属性
-                if (res.authSetting.hasOwnProperty('scope.bluetooth')) {
-                    //'scope.bluetooth'属性存在，且为false
-                    if (!res.authSetting['scope.bluetooth']) {
-                    //弹窗授权
-                    wx.openSetting({
-                        success(res) {
-                        console.log(res.authSetting)
-                        }
-                    })
-                    }
-                }
-                else
-                    //'scope.bluetooth'属性不存在，需要授权
-                    wx.authorize({
-                    scope: 'scope.bluetooth',
-                    success() {
-                        // 用户已经同意小程序使用手机蓝牙功能，后续调用 蓝牙 接口不会弹窗询问
-                        console.log(res.authSetting)
-                    }
-                    })
-            }
-        })
-        this.updateExpMatrix();
         this.updateSSIDandPWD();
         thispage=this;
         wx.request({
@@ -167,6 +152,53 @@ Page({
             thispage.setData({BinList: tmpArray});
           }
         })
+        
+        if(wx.getStorageSync('gbk_dzk')==''){
+            wx.downloadFile({
+            url: 'https://autosz.satintin.com/dzk/gbk_dzk.bin',
+            filePath: wx.env.USER_DATA_PATH+'/gbk_dzk.bin',
+            success(res){
+                if(res.statusCode!=200){
+                    wx.showModal({
+                        title: '错误',
+                        content: '网络异常！请重启小程序！',
+                        complete: (res) => {
+                            wx.exitMiniProgram();
+                        }
+                    })
+                    return;
+                }
+                wx.setStorageSync('gbk_dzk', res.filePath);
+                console.log(res.filePath);
+            }
+            })
+        }
+        if(wx.getStorageSync('ascii_dzk')==''){
+            wx.downloadFile({
+                url: 'https://autosz.satintin.com/dzk/ascii_dzk.bin',
+                filePath: wx.env.USER_DATA_PATH+'/ascii_dzk.bin',
+                success(res){
+                    if(res.statusCode!=200){
+                        wx.showModal({
+                        title: '错误',
+                        content: '网络异常！请重启小程序！',
+                        complete: (res) => {
+                            wx.exitMiniProgram();
+                        }
+                        })
+                        return;
+                    }
+                    wx.setStorageSync('ascii_dzk', res.filePath);
+                }
+            })
+        }
+        if(wx.getStorageSync('ExpInit')!=JSON.stringify(ExpMatrixInit)){
+            console.log("CLEARING ALL STORAGE")
+            wx.removeStorageSync('ExpMatrix');
+            wx.removeStorageSync('image_uri_list');
+            wx.setStorageSync('ExpInit', JSON.stringify(ExpMatrixInit));
+        }
+        this.updateExpMatrix();
     },
     changeBinVersion(event){
         this.setData({BinVersion: event.detail.value});
@@ -252,6 +284,12 @@ Page({
             }
           }
         })
+    },
+    sendChar(){
+        var char_data=read_char(get_gbk_offset('苹'))
+        if(char_data=='') return;
+        console.log(char_data);
+        sendUdpDefault('T'+char_data);
     }
 })
 

@@ -1,7 +1,9 @@
 {
   "pages":[
     "pages/index/index",
-    "pages/ManualScreen/ManualScreen"
+    "pages/ManualScreen/ManualScreen",
+    "pages/AutoLive/AutoLive",
+    "pages/help/help"
   ],
   "tabBar": {
     "list": [{
@@ -9,7 +11,13 @@
       "text": "蓝牙配网"
     },{
         "pagePath": "pages/ManualScreen/ManualScreen",
-        "text": "发送表情"
+        "text": "手动&自定义"
+      },{
+        "pagePath": "pages/AutoLive/AutoLive",
+        "text": "音乐同步"
+      },{
+        "pagePath": "pages/help/help",
+        "text": "帮助"
       }],
     "position": "top"
   },
