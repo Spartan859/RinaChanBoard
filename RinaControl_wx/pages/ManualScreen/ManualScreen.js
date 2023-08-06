@@ -53,6 +53,49 @@ async function getImageTobase64_url(tempFilePath) {
     });
     return base64;
 }
+function randomNum(minNum,maxNum){ 
+    switch(arguments.length){ 
+        case 1: 
+            return parseInt(Math.random()*minNum+1,10); 
+        break; 
+        case 2: 
+            return parseInt(Math.random()*(maxNum-minNum+1)+minNum,10); 
+        break; 
+            default: 
+                return 0; 
+            break; 
+    } 
+} 
+
+var autoExpOut=false;
+var normal_eye=[1,2,3,4,5,6,7,8,11,12,13,21];
+var normal_mouth=[1,2,3,4,5,6,7,9,10,11,14,15,16,17,18]
+var auto_interval=5000;
+function neverEndLoop(){
+    if(autoExpOut){
+        var eye=normal_eye[randomNum(0,normal_eye.length-1)];
+        var cheek=randomNum(0,4);
+        var mouth=normal_mouth[randomNum(0,normal_mouth.length-1)]
+        thispage.setExp('eye_left',exp_all['eye_left'],0);
+        exp_all['eye_left']=eye;
+        thispage.setExp('eye_left',exp_all['eye_left'],1);
+
+        thispage.setExp('eye_right',exp_all['eye_right'],0);
+        exp_all['eye_right']=eye;
+        thispage.setExp('eye_right',exp_all['eye_right'],1);
+
+        thispage.setExp('cheek',exp_all['cheek'],0);
+        exp_all['cheek']=cheek;
+        thispage.setExp('cheek',exp_all['cheek'],1);
+
+        thispage.setExp('mouth',exp_all['mouth'],0);
+        exp_all['mouth']=mouth;
+        thispage.setExp('mouth',exp_all['mouth'],1);
+        sendUdpDefault('e'+thispage.getExpSendStr())
+    }
+    setTimeout(neverEndLoop,auto_interval);
+}
+
 Page({
 
     /**
@@ -63,7 +106,8 @@ Page({
         image_len: wx.getSystemInfoSync().screenHeight*65/1027,
         CatList: ["左眼","右眼","脸颊","嘴巴","全脸"],
         curCatIndex: 0,
-        imageUri: {}
+        imageUri: {},
+        display_interval: 5
     },
 
     /**
@@ -90,6 +134,7 @@ Page({
             }
         }
         this.setData({expMa: IndexExport.exp_matrix,imageUri: image_uri_list});
+        setTimeout(neverEndLoop,5000);
     },
     /**
      * 生命周期函数--监听页面初次渲染完成
@@ -228,6 +273,14 @@ Page({
           exp_all[catName]=0;
       }
       ExpViewA.erase_all();
+  },
+  setAutoExpOut(){
+      autoExpOut^=1;
+  },
+  setAutoInt(e){
+    this.setData({display_interval: e.detail.value});
+    var res=parseInt(e.detail.value)
+    if(res>0) auto_interval=res*1000;
   }
 })
 

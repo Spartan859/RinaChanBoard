@@ -3,6 +3,14 @@ import {IndexExport} from '../index/index'
 import {sleep,sendUdpDefault,sendTxt} from '../../utils/util'
 console.log(IndexExport.exp_matrix);
 
+var rec_res_table=[0];
+var res_id=0;
+
+var music_offset_table={};
+var isupload=false;
+var recorder_status=0;
+var startTimestamp=0;
+
 var ExpViewA;
 const FPS=10;
 var ExpContent={};
@@ -64,6 +72,9 @@ Page({
         currentSecond: "00:00",
         SongList: [],
         curSongIndex: 0,
+        manual_lat: 0,
+        recog_interval: 5000,
+        thrh: 50
     },
 
     /**
@@ -72,7 +83,14 @@ Page({
     onLoad(options) {
         //console.log(IndexExport.exp_matrix);
         thispage=this;
+        let mlat=wx.getStorageSync('manual_lat');
+        if(mlat!='') this.setData({manual_lat: mlat});
+        let rint=wx.getStorageSync('recog_interval');
+        if(rint!='') this.setData({recog_interval: rint});
+        let thtmp=wx.getStorageSync('thrh');
+        if(thtmp!='') this.setData({thrh: thtmp});
         this.audioCtx=wx.getBackgroundAudioManager();
+        this.recorderManager=wx.getRecorderManager();
         //this.startPlaying();
         this.watchAudio();
         this.StartProgressMonitor();
@@ -93,6 +111,12 @@ Page({
                 
             }
           })
+        wx.request({
+          url: 'https://autosz.satintin.com/offset.json',
+          success(res){
+              music_offset_table=res.data;
+          }
+        })
     },
 
     startPlaying(){
@@ -299,8 +323,174 @@ Page({
       })
   },
   ST(time){
-    this.audioCtx.seek(time);
-    this.audioCtx.play();
+    var lat=(Date.now()-startTimestamp+parseInt(this.data.manual_lat))/1000;
+    this.audioCtx.seek(time+lat); 
+    this.play();
+  },
+  getRecordLimit() {
+    let that = this;
+    wx.getSetting({
+      success(res) {
+        if (!res.authSetting['scope.record']) { // 未授权
+          wx.authorize({
+            scope: 'scope.record',
+            success () { // 一次才成功授权
+              that._startRecord()
+            },
+            fail(err) {
+              console.log(err)
+              wx.showModal({
+                title: '温馨提示',
+                content: '您未授权录音，该功能将无法使用',
+                showCancel: true,
+                confirmText: "授权",
+                success: function (res) {
+                  if (res.confirm) {
+                    wx.openSetting({
+                      success: (res) => {
+                        if (!res.authSetting['scope.record']) {
+                          //未设置录音授权
+                          wx.showModal({
+                            title: '提示',
+                            content: '您未授权录音，功能将无法使用',
+                            showCancel: false,
+                            success: function () {}
+                          })
+                        } else { // 二次才成功授权
+                          that._startRecord()
+                        }
+                      },
+                      fail: function () {
+                        console.log("授权设置录音失败");
+                      }
+                    })
+                  }
+                },
+                fail: function (err) {
+                  console.log("打开录音弹框失败 => ", err);
+                }
+              })
+            }
+          })
+        } else { // 已授权
+          that._startRecord()
+        }
+      }
+    })
+  },
+  _startRecord() {
+    recorder_status=true;
+    const options = {
+      duration: this.data.recog_interval,//指定录音的时长，单位 ms，最大为10分钟（600000），默认为1分钟（60000）
+      sampleRate: 16000,//采样率
+      numberOfChannels: 1,//录音通道数
+      encodeBitRate: 96000,//编码码率
+      format: 'mp3',//音频格式，有效值 aac/mp3
+      frameSize: 50,//指定帧大小，单位 KB
+    }
+  
+    //点击录制
+    this.recorderManager.start(options);
+
+    this.recorderManager.onStart(() => {
+      console.log('点击录制...')
+      startTimestamp = Date.now();
+    })
+    this.recorderManager.onStop((res) => {
+        console.log('停止录音', res)
+        let filePath = res.tempFilePath;
+        let duration = res.duration;
+        recorder_status=false;
+        if((Date.now() - startTimestamp) / 1000 < 2) {
+          wx.showToast({
+            title: '录音时间太短!',
+            icon: 'none',
+            duration: 1500
+          })
+          return;
+        }
+        this.upload_record(filePath);
+      })
+    //错误回调
+    this.recorderManager.onError((res) => {
+      console.log('录音失败', res);
+    })
+  },
+  _endRecord() {
+    this.recorderManager.stop();
+  },
+  upload_record(filePath){
+    isupload=true;
+    console.log(filePath);
+    let that=this;
+    wx.uploadFile({
+      filePath: filePath,
+      name: 'songrec',
+      url: 'https://www.satintin.com/route/upload?sn='+this.data.SongList[curSongid]+'&thrh='+this.data.thrh,
+      success(res){
+          console.log(res.data);
+          var res_ps=JSON.parse(JSON.parse(res.data).data);
+          if(res_ps.name==''){
+              isupload=false;
+              that.getRecordLimit();
+              return;
+          }
+          if(res_ps.name!='123'){
+              rec_res_table[0]=res_ps.offset;
+            that.set_song_recorded(res_ps.name,res_ps.offset)
+            return;
+          }
+          for(var i in res_ps.offset){
+              rec_res_table[i]=res_ps.offset[i].offset;
+          }
+          res_id=0;
+          that.set_song_recorded('123',rec_res_table[0]);
+      },
+      complete(res){
+          isupload=false;
+      }
+    })
+  },
+  recordBtn: function () {
+    if(!isupload){
+      if (!recorder_status) {
+        this.getRecordLimit()
+      } else{
+        this._endRecord()
+      }
+    }
+  },
+  set_song_recorded(name,offset){
+    var now_time=offset;
+    if(name!='123') now_time-=music_offset_table[this.data.SongList[curSongid]];    
+    this.ST(now_time);
+  },
+  setLat: function(e){
+    this.setData({manual_lat: e.detail.value})
+    wx.setStorageSync('manual_lat', e.detail.value)
+    return {value: e.detail.value}
+  },
+  setRecog: function(e){
+      let res=parseInt(e.detail.value);
+      this.setData({recog_interval: res});
+      wx.setStorageSync('recog_interval',res);
+      return {value: e.detail.value};
+  },
+  setThrh: function(e){
+      let res=parseInt(e.detail.value);
+      this.setData({thrh: res});
+      wx.setStorageSync('thrh',res);
+      return {value: e.detail.value};
+  },
+  setResBac: function(e){
+      if(res_id<=0) return;
+      --res_id;
+      this.set_song_recorded('123',rec_res_table[res_id]);
+  },
+  setResFor: function(e){
+      if(res_id>=rec_res_table.length-1) return;
+      ++res_id;
+      this.set_song_recorded('123',rec_res_table[res_id]);
   }
 })
 

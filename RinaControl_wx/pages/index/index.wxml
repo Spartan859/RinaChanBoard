@@ -13,7 +13,7 @@
         </view>
     </view>
     <button style="font-size: small;margin-bottom: 10px;" bindtap="sendWifiValue">发送WiFi信息</button>
-    <button style="font-size: small;" bindtap="sendChar">发送配置文件</button>
+    <button style="font-size: small;" bindtap="prepareInit">发送配置文件</button>
     <view class="row_box" style="width: 90%;">
         <text>亮度：{{brightness}}</text>
         <slider min="1" max="255" style="width: 70%;" value="{{brightness}}" bindchange="changeBrightness"></slider>

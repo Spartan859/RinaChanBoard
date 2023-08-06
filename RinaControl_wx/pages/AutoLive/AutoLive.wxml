@@ -21,4 +21,19 @@
         </button>
     </view>
     <button bindtap="ClearSongTxt" style="margin-top:10px">清空歌曲缓存</button>
+    <view class="row_box" style="margin-top:10px">
+        <button bindtap="setResBac">前一结果</button>
+        <button bindtap="recordBtn">听歌识曲</button>
+        <button bindtap="setResFor">后一结果</button>
+    </view>
+    
+    <view class="row_box" style="margin-top: 10px;">延迟调整(ms)：
+        <input class="input" bindinput="setLat" placeholder="输入延迟" value="{{manual_lat}}"/>
+    </view>
+    <view class="row_box" style="margin-top: 10px;">识别周期(ms)：
+        <input class="input" bindinput="setRecog" placeholder="输入周期" value="{{recog_interval}}"/>
+    </view>
+    <view class="row_box" style="margin-top: 10px;">识别阈值：
+        <input class="input" bindinput="setThrh" placeholder="输入阈值" value="{{thrh}}"/>
+    </view>
 </block>

@@ -37,20 +37,27 @@
             </view>
           </block>
         </scroll-view>
-        <view class="row_box">
+        <view class="row_box" style="width: 90%">
             <checkbox-group bindchange="setSyncLR">
                 <checkbox/>
             </checkbox-group>
             <text>同步左右眼</text>
-            <button bindtap="sendExpString" style="font-size: smaller;">发送</button>
+            <checkbox-group bindchange="setAutoExpOut">
+                <checkbox/>
+            </checkbox-group>
+            <text>随机发送</text>
+            <button bindtap="sendExpString" style="font-size: smaller;width: 40%;">发送</button>
         </view>
         <view class="row_box" style="width: 90%">
-        <text>自定义：</text>
+            <text>自定义：</text>
             <button bindtap="EraseExpView" style="width: 30%;font-size: smaller; margin-right: 10px;">清空</button>
             <button bindtap="ExportTo" style="width: 30%;font-size: smaller;">导出到</button>
             <picker bindchange="ChangeCat" value="{{curCatIndex}}" range="{{CatList}}" style="margin: 10px;background-color:khaki;">
                 <text>{{CatList[curCatIndex]}}</text>
             </picker>
+        </view>
+        <view class="row_box">随机周期(s)：
+            <input class="input" bindinput="setAutoInt" placeholder="输入周期" value="{{display_interval}}"/>
         </view>
     </block>
 </view>

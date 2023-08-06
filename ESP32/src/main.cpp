@@ -22,13 +22,10 @@
 #include <BLEUtils.h>
 #include <Update.h>
 #include <WiFiClient.h>
-#include <esp_log.h>
-#include "esp_heap_caps.h"
-#include "esp_task_wdt.h"
-#include "esp_log.h"
+#include <esp_bt_main.h>
 #define SERVICE_UUID "85253ceb-b0b7-4cc2-8e81-c22affa36a43"
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
-#define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
+//#define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
 
 unsigned long previousMillis = 0;
 unsigned long interval = 3000;
@@ -84,18 +81,7 @@ class CharacteristicsCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *pCharacteristic)
   {
-    Serial.print("BLE Value Written ");
-    Serial.println(pCharacteristic->getValue().c_str());
-    
-    if (pCharacteristic == wifi_characteristic)
-    {
       wifiValue = pCharacteristic->getValue().c_str();
-        ssid=wifiValue.substring(0,wifiValue.indexOf(';'));
-        password=wifiValue.substring(wifiValue.indexOf(';')+1);
-      wifi_characteristic->setValue(const_cast<char *>(wifiValue.c_str()));
-      //wifi_characteristic->notify();
-      StartWifi();
-    }
   }
 };
 
@@ -187,15 +173,20 @@ void numStr_to_numArray(const char * numStr, int * numArr, int numArrLen) {
 void execOTA(String bin_name);
 
 void StartWifi(){
+    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     pServer->getAdvertising()->stop();
     btStop();
+    //esp_bluedroid_disable();
+    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     delay(1000);
     Serial.print("WIFI Mode: ");
     Serial.println(WiFi.getMode());  // 显示当前WIFI的模式
     Serial.print("Connecting to ");
     Serial.println(ssid);
     Serial.println(password);
+    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     WiFi.begin(ssid.c_str(), password.c_str());
+    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     while (WiFi.status() != WL_CONNECTED) { // 等待连接WIFI 直到连接成功 退出循环
         delay(500);
         Serial.print(".");
@@ -213,6 +204,8 @@ void StartWifi(){
     //delay(1000);
     UDP2.begin(localUdpPort);
     WifiStarted=true;
+
+    //execOTA("0.0.5.bin");
 }
 
 void StartBLE(){
@@ -227,27 +220,34 @@ void StartBLE(){
           BLECharacteristic::PROPERTY_WRITE |
           BLECharacteristic::PROPERTY_NOTIFY |
           BLECharacteristic::PROPERTY_INDICATE);
-    message_characteristic = pService->createCharacteristic(
-      MESSAGE_CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ |
-          BLECharacteristic::PROPERTY_WRITE |
-          BLECharacteristic::PROPERTY_NOTIFY |
-          BLECharacteristic::PROPERTY_INDICATE);
     pService->start();
     pServer->getAdvertising()->start();
-    message_characteristic->setValue("Connected!");
-    message_characteristic->setCallbacks(new CharacteristicsCallbacks());
-
     wifi_characteristic->setValue("ExampleSSID;ExamplePWD");
     wifi_characteristic->setCallbacks(new CharacteristicsCallbacks());
 
     Serial.println("BLE Waiting for a client connection to notify...");
 }
-int log_to_serial(const char *fmt, va_list args) {
-        char buf[128];
-        vsnprintf(buf, sizeof(buf), fmt, args);
-        Serial.println(buf); // 将输出内容写入串口
-        return 0;
+void read_usart(){
+  int i = Serial1.available();  //返回目前串口接收区内的已经接受的数据量
+  if(i != 0){
+    Serial.print("串口接收到的数据量为:");
+    Serial.println(Serial1.available());
+    while(i--){
+        int temp = Serial1.read();   //读取一个数据并且将它从缓存区删除
+        Serial.print(temp);    //读取串口接收回来的数据但是不做处理只给与打印
+        for(int i=0;i<5;i++){
+            setFace(catNameList[i],exp_now[i],0);
+            exp_now[i]=0;
+        }
+        exp_now[4]=temp;
+        for(int i=0;i<5;i++){
+            setFace(catNameList[i],exp_now[i],1);
+        }
+        showFrame();
+    }
+    Serial.println("");
+    //data_analyse();    //至关重要的一步，也就是把读取回来的数据进行分步截取直接拿到我们想要的数据，我下一篇博文会讲如何自己写这个函数
+    }
 }
 void setup() {
     #ifdef __Enable_FastLED
@@ -278,10 +278,15 @@ void setup() {
     Serial.begin(9600);
     Serial.println();
     Serial.println();
+
+    Serial1.begin(9600,SERIAL_8E1,GPIO_NUM_17,GPIO_NUM_18);
+
     //SerialBT.end();
     }
     //StartBLE
-    StartWifi();
+    StartBLE();
+    //delay(10000);
+    //StartWifi();
     //StartBLE();
 }
 bool allwords[16][16*50+5];
@@ -306,6 +311,13 @@ void AppendWord(String hexstr){
 
 
 void loop() {
+    read_usart();
+    if(wifiValue!=""){
+      ssid=wifiValue.substring(0,wifiValue.indexOf(';'));
+      password=wifiValue.substring(wifiValue.indexOf(';')+1);
+      wifiValue="";
+      StartWifi();
+    }
     if(WifiStarted&&!Updating){
         int packetSize=UDP2.parsePacket();
         if(packetSize){
@@ -361,6 +373,7 @@ void loop() {
             //deserializeJson(expJSON,buf);
         }
     }
+    /*
     unsigned long currentMillis = millis();
     if (WifiStarted&&(!Updating)&&(WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >=interval)) {
         Serial.print(millis());
@@ -368,7 +381,7 @@ void loop() {
         WiFi.disconnect();
         WiFi.reconnect();
         previousMillis = currentMillis;
-    }
+    }*/
 }
 
 
