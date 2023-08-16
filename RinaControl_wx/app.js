@@ -7,6 +7,8 @@ App({
     wx.setStorageSync('logs', logs)
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    BLEmtu: 19,
+    blestat: false
   },
 })

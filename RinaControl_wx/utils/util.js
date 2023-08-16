@@ -1,4 +1,7 @@
+import {sendBLEmessage} from '../pages/index/index'
 const encoding = require("./encoding.js")
+
+const app=getApp();
 
 const formatTime = date => {
   const year = date.getFullYear()
@@ -100,6 +103,11 @@ const sendUdpString=(msg,port,ip)=>{
 }
 
 export const sendUdpDefault=(msg)=>{
+    sendBLEmessage(msg);
+    sendUdpString(msg,sendto_port,ipa_out.ip);
+}
+
+function sendUdpPure(msg){
     sendUdpString(msg,sendto_port,ipa_out.ip);
 }
 
@@ -111,17 +119,30 @@ export const sendInit=async ()=>{
     console.log(ipa_out.ip);
     let str=JSON.stringify(wx.getStorageSync('ExpMatrix'));
     console.log(str);
-    var yz=1400;
-    sendUdpDefault('C');
-    console.log("sending pack");
-    await sleep(300);
-    for(var i=0;i<str.length;i+=yz){
+    if(!app.globalData.blestat){
+        var yz=1400;
+        sendUdpPure('C');
         console.log("sending pack");
-        //console.log(str.substr(i,yz));
-        sendUdpDefault('A'+str.substr(i,yz));
         await sleep(300);
+        for(var i=0;i<str.length;i+=yz){
+            //console.log("sending pack");
+            //console.log(str.substr(i,yz));
+            sendUdpPure('A'+str.substr(i,yz));
+            await sleep(300);
+        }
+        sendUdpPure('B');
+    }else{
+        var yz=app.globalData.BLEmtu;
+        sendBLEmessage('C');
+        //await sleep(50);
+        for(var i=0;i<str.length;i+=yz){
+            console.log("sending pack");
+            //console.log(str.substr(i,yz));
+            sendBLEmessage('A'+str.substr(i,yz));
+            //await sleep(50);
+        }
+        sendBLEmessage('B');
     }
-    sendUdpDefault('B');
 }
 async function sendTxt(live_name){
     console.log("Sending Txt "+live_name);

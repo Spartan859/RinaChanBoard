@@ -1,6 +1,7 @@
 // index.js
 // 获取应用实例
 import {ipa_out,sendInit,resetipa,sleep, sendUdpDefault} from '../../utils/util'
+import {get_gbk_offset,read_char,read_char_extra} from '../../utils/getCharPic'
 console.log(ipa_out.ip);
 
 const app = getApp()
@@ -23,8 +24,17 @@ var searchingBLE=false;
 
 var dzk_ready=false;
 
-import {get_gbk_offset,read_char} from '../../utils/getCharPic'
 
+
+export const sendBLEmessage=function(str){
+    if(!thispage.data.ble_status) return;
+    wx.writeBLECharacteristicValue({
+        characteristicId: MESSAGE_UUID,
+        deviceId: deviceId,
+        serviceId: SERVICE_UUID,
+        value: str2ab(str)
+    })
+}
 
 Page({
     data:{
@@ -33,7 +43,12 @@ Page({
         ble_status: false,
         brightness: 40,
         BinList: [],
-        BinVersion: 3
+        BinVersion: 5,
+        dispMessage: '璃奈板你说句话呀',
+        slide_intv: 100
+    },
+    testInit: function(){
+        sendInit();
     },
     prepareInit: async function(){
         console.log(ipa_out.ip);
@@ -112,7 +127,7 @@ Page({
                   })
             }*/
         })
-        this.setData({ble_status: false});
+        setBLEstatus(false);
         this.prepareInit();
     },
     updateExpMatrix: function(){
@@ -285,16 +300,30 @@ Page({
           }
         })
     },
-    sendChar(){
-        var char_data=read_char(get_gbk_offset('苹'))
-        if(char_data=='') return;
-        console.log(char_data);
-        sendUdpDefault('T'+char_data);
+    sendDispMessage(){
+        sendUdpDefault('t');
+        sendUdpDefault('p'+this.data.slide_intv);
+        for(var i in this.data.dispMessage){
+            var char_data=read_char_extra(this.data.dispMessage[i]);
+            if(char_data==''){
+                char_data=read_char(get_gbk_offset(this.data.dispMessage[i]));
+                if(char_data=='') return;
+            }
+            sendUdpDefault('T'+char_data);
+        }
+        sendUdpDefault('P');
+    },
+    setDispMessage(e){
+        this.setData({dispMessage: e.detail.value});
+    },
+    setSlideIntv(e){
+        this.setData({slide_intv: parseInt(e.detail.value)});
     }
 })
 
 let setBLEstatus=function(val){
     thispage.setData({ble_status: val});
+    app.globalData.blestat=val;
 }
 // 监听扫描到新设备事件
 wx.onBluetoothDeviceFound((res) => {
@@ -309,8 +338,39 @@ wx.onBluetoothDeviceFound((res) => {
                 setBLEstatus(true);
                 wx.showModal({
                     title: '蓝牙连接成功！',
-                    content: "请在输入框中依次填写好 wifi/热点 名称、密码，并点击“发送wifi信息！”"+
+                    content: "你现在可以直接操控璃奈板了！(需要固件版本大于等于0.1.0)\n如果要更新固件，请在输入框中依次填写好 wifi/热点 名称、密码，并点击“发送wifi信息！”"+
                     "\n 注意：wifi/热点 必须设置为2.4ghz而非5ghz，并关闭wifi6选项，否则无法连接！"
+                })
+                wx.getBLEDeviceServices({
+                    deviceId,
+                    success: (res)=>{
+                        console.log(res);
+                        wx.getBLEDeviceCharacteristics({
+                            deviceId: deviceId,
+                            serviceId: res.services[0].uuid,
+                            success: (res)=>{
+                                wx.getBLEMTU({
+                                    deviceId: deviceId,
+                                    writeType: 'write',
+                                    success (res) {
+                                      app.globalData.BLEmtu=res.mtu-4;
+                                      wx.setBLEMTU({
+                                        deviceId: deviceId,
+                                        mtu: 511,
+                                        success(res){
+                                            wx.showToast({
+                                                title: 'MTU: '+res.mtu,
+                                                icon: 'none'
+                                            })
+                                            app.globalData.BLEmtu=res.mtu-4;
+                                            sendInit();
+                                        }
+                                      })
+                                    }
+                                })
+                            }
+                        })
+                    }
                 })
             }
           })
@@ -325,6 +385,7 @@ wx.onBluetoothDeviceFound((res) => {
 
 
 module.exports={
-    IndexExport
+    IndexExport,
+    sendBLEmessage
 }
 

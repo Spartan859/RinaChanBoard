@@ -249,7 +249,6 @@ Page({
       sendInit().then(()=>{sending_Init=false});
   },
   deleteExp(catName,expId){
-    sending_Init=true;
     if(exp_all[catName]==expId){ 
         exp_all[catName]=0;
         this.setExp(catName,expId,0);
@@ -265,7 +264,7 @@ Page({
     wx.setStorageSync('USER_exp_matrix', USER_exp_matrix);
     wx.setStorageSync('USER_image_uri_list', USER_image_uri_list);
     this.setData({expMa: IndexExport.exp_matrix,imageUri: image_uri_list});
-    
+    sending_Init=true;
     sendInit().then(()=>{sending_Init=false});
 },
   EraseExpView(){

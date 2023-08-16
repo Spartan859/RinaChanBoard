@@ -23,16 +23,17 @@
 #include <Update.h>
 #include <WiFiClient.h>
 #include <esp_bt_main.h>
+#include <freertos/task.h>
 #define SERVICE_UUID "85253ceb-b0b7-4cc2-8e81-c22affa36a43"
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
-//#define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
+#define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
 
 unsigned long previousMillis = 0;
 unsigned long interval = 3000;
 
 //#define LED_PIN 12
 
-const int versionArray[]={0,0,5};
+const int versionArray[]={0,1,1};
 
 String ssid="hoshizora",password="zteztezte";
 
@@ -50,11 +51,15 @@ BLEServer *pServer = NULL;
 BLECharacteristic *wifi_characteristic = NULL;
 String wifiValue="";
 BLECharacteristic *message_characteristic = NULL;
+String messageValue="";
 //
 
 //Facial Expressions
 String expTxt="";
 DynamicJsonDocument expJSON(32768);
+
+const char* id_matrix_txt="[{\"0\":-1,\"1\":-1,\"2\":38,\"3\":39,\"4\":70,\"5\":71,\"6\":102,\"7\":103,\"8\":134,\"9\":135,\"10\":166,\"11\":167,\"12\":198,\"13\":199,\"14\":230,\"15\":231,\"16\":-1,\"17\":-1},{\"0\":-1,\"1\":10,\"2\":37,\"3\":40,\"4\":69,\"5\":72,\"6\":101,\"7\":104,\"8\":133,\"9\":136,\"10\":165,\"11\":168,\"12\":197,\"13\":200,\"14\":229,\"15\":232,\"16\":259,\"17\":-1},{\"0\":9,\"1\":11,\"2\":36,\"3\":41,\"4\":68,\"5\":73,\"6\":100,\"7\":105,\"8\":132,\"9\":137,\"10\":164,\"11\":169,\"12\":196,\"13\":201,\"14\":228,\"15\":233,\"16\":258,\"17\":260},{\"0\":8,\"1\":12,\"2\":35,\"3\":42,\"4\":67,\"5\":74,\"6\":99,\"7\":106,\"8\":131,\"9\":138,\"10\":163,\"11\":170,\"12\":195,\"13\":202,\"14\":227,\"15\":234,\"16\":257,\"17\":261},{\"0\":7,\"1\":13,\"2\":34,\"3\":43,\"4\":66,\"5\":75,\"6\":98,\"7\":107,\"8\":130,\"9\":139,\"10\":162,\"11\":171,\"12\":194,\"13\":203,\"14\":226,\"15\":235,\"16\":256,\"17\":262},{\"0\":6,\"1\":14,\"2\":33,\"3\":44,\"4\":65,\"5\":76,\"6\":97,\"7\":108,\"8\":129,\"9\":140,\"10\":161,\"11\":172,\"12\":193,\"13\":204,\"14\":225,\"15\":236,\"16\":255,\"17\":263},{\"0\":5,\"1\":15,\"2\":32,\"3\":45,\"4\":64,\"5\":77,\"6\":96,\"7\":109,\"8\":128,\"9\":141,\"10\":160,\"11\":173,\"12\":192,\"13\":205,\"14\":224,\"15\":237,\"16\":254,\"17\":264},{\"0\":4,\"1\":16,\"2\":31,\"3\":46,\"4\":63,\"5\":78,\"6\":95,\"7\":110,\"8\":127,\"9\":142,\"10\":159,\"11\":174,\"12\":191,\"13\":206,\"14\":223,\"15\":238,\"16\":253,\"17\":265},{\"0\":3,\"1\":17,\"2\":30,\"3\":47,\"4\":62,\"5\":79,\"6\":94,\"7\":111,\"8\":126,\"9\":143,\"10\":158,\"11\":175,\"12\":190,\"13\":207,\"14\":222,\"15\":239,\"16\":252,\"17\":266},{\"0\":2,\"1\":18,\"2\":29,\"3\":48,\"4\":61,\"5\":80,\"6\":93,\"7\":112,\"8\":125,\"9\":144,\"10\":157,\"11\":176,\"12\":189,\"13\":208,\"14\":221,\"15\":240,\"16\":251,\"17\":267},{\"0\":1,\"1\":19,\"2\":28,\"3\":49,\"4\":60,\"5\":81,\"6\":92,\"7\":113,\"8\":124,\"9\":145,\"10\":156,\"11\":177,\"12\":188,\"13\":209,\"14\":220,\"15\":241,\"16\":250,\"17\":268},{\"0\":0,\"1\":20,\"2\":27,\"3\":50,\"4\":59,\"5\":82,\"6\":91,\"7\":114,\"8\":123,\"9\":146,\"10\":155,\"11\":178,\"12\":187,\"13\":210,\"14\":219,\"15\":242,\"16\":249,\"17\":269},{\"0\":-1,\"1\":21,\"2\":26,\"3\":51,\"4\":58,\"5\":83,\"6\":90,\"7\":115,\"8\":122,\"9\":147,\"10\":154,\"11\":179,\"12\":186,\"13\":211,\"14\":218,\"15\":243,\"16\":248,\"17\":-1},{\"0\":-1,\"1\":22,\"2\":25,\"3\":52,\"4\":57,\"5\":84,\"6\":89,\"7\":116,\"8\":121,\"9\":148,\"10\":153,\"11\":180,\"12\":185,\"13\":212,\"14\":217,\"15\":244,\"16\":247,\"17\":-1},{\"0\":-1,\"1\":23,\"2\":24,\"3\":53,\"4\":56,\"5\":85,\"6\":88,\"7\":117,\"8\":120,\"9\":149,\"10\":152,\"11\":181,\"12\":184,\"13\":213,\"14\":216,\"15\":245,\"16\":246,\"17\":-1},{\"0\":-1,\"1\":-1,\"2\":-1,\"3\":54,\"4\":55,\"5\":86,\"6\":87,\"7\":118,\"8\":119,\"9\":150,\"10\":151,\"11\":182,\"12\":183,\"13\":214,\"14\":215,\"15\":-1,\"16\":-1,\"17\":-1}]";
+DynamicJsonDocument id_matrix(6144);
 
 int exp_now[5]={1,1,1,1,0};
 String catNameList[5]={"eye_left","eye_right","cheek","mouth","full_face"};
@@ -77,15 +82,9 @@ class MyServerCallbacks : public BLEServerCallbacks
 };
 
 void StartWifi();
-class CharacteristicsCallbacks : public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic *pCharacteristic)
-  {
-      wifiValue = pCharacteristic->getValue().c_str();
-  }
-};
 
 void setPixel(int pixelId,int tp){
+    if(pixelId<0) return;
     #ifdef __Enable_FastLED
         if(tp) leds[pixelId]=CRGB(255,0,255);
         else leds[pixelId]=CRGB::Black;
@@ -172,6 +171,137 @@ void numStr_to_numArray(const char * numStr, int * numArr, int numArrLen) {
 
 void execOTA(String bin_name);
 
+bool allwords[16][16*52+5];
+int nowleft=0;
+bool nowplaying=0;
+int pl_intv=100;
+void AppendWord(String hexstr){
+	Serial.println(hexstr);
+	char tmpbuf[5];
+	memset(tmpbuf,0,sizeof(tmpbuf));
+    for(int i=0;i<hexstr.length();i+=4){
+		tmpbuf[0]=hexstr[i];tmpbuf[1]=hexstr[i+1];
+		int code1=strtol(tmpbuf,0,16);
+		tmpbuf[0]=hexstr[i+2];tmpbuf[1]=hexstr[i+3];
+		int code2=strtol(tmpbuf,0,16);
+        int tmp_code=(code1<<8)|code2;
+        for(int j=15;j>=0;j--){
+			if((tmp_code>>j)&1){
+                allwords[i>>2][nowleft+15-j]=1;
+            }
+        }
+    }
+}
+void setByCor(int x,int y,int tp){
+    //Serial.print(x); Serial.print(' ');
+    //Serial.print(y); Serial.print(' ');
+    //Serial.println((int)id_matrix[x][std::to_string(y)]);
+    setPixel(id_matrix[x][std::to_string(y)],tp);
+}
+void word_display_loop(void * pvParameters){
+    //Serial.println(lft);
+    int lft=0;
+    while(nowplaying){
+        if(lft>=nowleft) lft=0;
+        //if(lft>=nowleft) return;
+        for(int i=0;i<16;i++){
+            for(int j=0;j<16;j++){
+                if(allwords[i][j+lft]) setByCor(i,j,1);
+                else setByCor(i,j,0);
+            }
+        }
+        showFrame();
+        delay(pl_intv);
+        lft++;
+    }
+}
+
+TaskHandle_t dispWd_handle=NULL;
+
+void clearDispMessage(){
+    if(!nowplaying) return;
+    nowleft=0;
+    nowplaying=0;
+    memset(allwords,0,sizeof(allwords));
+    if(dispWd_handle!=NULL){
+        vTaskDelete(dispWd_handle);
+        dispWd_handle=NULL;
+    }
+    for(int i=0;i<NUM_LEDS;i++){
+        setPixel(i,0);
+    }
+    showFrame();
+}
+
+void handleMessage(const char* buf){
+    if(buf[0]=='A'){
+        String tmpadd=buf+1;
+        //Serial.println(tmpadd);
+        expTxt=expTxt+tmpadd;
+        //Serial.println(expTxt);
+    }else if(buf[0]=='B'){
+        deserializeJson(expJSON,expTxt);
+        Serial.println(expTxt.length());
+        //Serial.println(expTxt);
+        if((int)expJSON["mouth"][2][2]>0){
+            for(int i=0;i<5;i++){
+                setFace(catNameList[i],exp_now[i],1);
+            }
+            showFrame();
+        }
+    }else if(buf[0]=='C'){
+        expTxt="";
+    }else if(buf[0]=='e'){
+        clearDispMessage();
+        for(int i=0;i<5;i++){
+            setFace(catNameList[i],exp_now[i],0);
+        }
+        numStr_to_numArray(buf+1,exp_now,5);
+        Serial.println(buf);
+        for(int i=0;i<5;i++){
+            setFace(catNameList[i],exp_now[i],1);
+        }
+        showFrame();
+    }else if(buf[0]=='U'){
+        clearDispMessage();
+        //更新固件
+        Updating=true;
+        String get_bin_name=buf+2;
+        execOTA(get_bin_name);
+    }else if(buf[0]=='S'){
+        //设置亮度
+        String BrtnsStr=buf+2;
+        Brightness=atoi(BrtnsStr.c_str());
+        setLedBrightness(Brightness);
+        showFrame();
+    }else if(buf[0]=='T'){
+        String bufstr_tmp=buf+1;
+        AppendWord(bufstr_tmp);
+        nowleft+=16;
+    }else if(buf[0]=='P'){
+        nowplaying=1;
+        xTaskCreate(word_display_loop,"word_display_loop",4096,NULL,2,&dispWd_handle);
+    }else if(buf[0]=='t'){
+        Serial.println('Clearing all words');
+        clearDispMessage();
+    }else if(buf[0]=='p'){
+        String pl_intv_txt=buf+1;
+        pl_intv=atoi(pl_intv_txt.c_str());
+    }
+}
+
+class CharacteristicsCallbacks : public BLECharacteristicCallbacks{
+    void onWrite(BLECharacteristic *pCharacteristic){
+        //Serial.println(pCharacteristic->getValue().c_str());
+        if(pCharacteristic==wifi_characteristic){
+            wifiValue = pCharacteristic->getValue().c_str();
+        }
+        if(pCharacteristic==message_characteristic){
+            handleMessage(pCharacteristic->getValue().c_str());
+        }
+    }
+};
+
 void StartWifi(){
     Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
     pServer->getAdvertising()->stop();
@@ -220,36 +350,44 @@ void StartBLE(){
           BLECharacteristic::PROPERTY_WRITE |
           BLECharacteristic::PROPERTY_NOTIFY |
           BLECharacteristic::PROPERTY_INDICATE);
+    message_characteristic = pService->createCharacteristic(
+      MESSAGE_CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_READ |
+          BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_NOTIFY |
+          BLECharacteristic::PROPERTY_INDICATE);
     pService->start();
     pServer->getAdvertising()->start();
+    message_characteristic->setValue("Connected!");
+    message_characteristic->setCallbacks(new CharacteristicsCallbacks());
     wifi_characteristic->setValue("ExampleSSID;ExamplePWD");
     wifi_characteristic->setCallbacks(new CharacteristicsCallbacks());
 
     Serial.println("BLE Waiting for a client connection to notify...");
 }
 void read_usart(){
-  int i = Serial1.available();  //返回目前串口接收区内的已经接受的数据量
-  if(i != 0){
-    Serial.print("串口接收到的数据量为:");
-    Serial.println(Serial1.available());
-    while(i--){
-        int temp = Serial1.read();   //读取一个数据并且将它从缓存区删除
-        Serial.print(temp);    //读取串口接收回来的数据但是不做处理只给与打印
-        for(int i=0;i<5;i++){
-            setFace(catNameList[i],exp_now[i],0);
-            exp_now[i]=0;
+    int i = Serial1.available();
+    if(i != 0){
+        Serial.print("串口接收到的数据量为:");
+        Serial.println(Serial1.available());
+        while(i--){
+            int temp = Serial1.read();
+            Serial.print(temp);
+            for(int i=0;i<5;i++){
+                setFace(catNameList[i],exp_now[i],0);
+                exp_now[i]=0;
+            }
+            exp_now[4]=temp;
+            for(int i=0;i<5;i++){
+                setFace(catNameList[i],exp_now[i],1);
+            }
+            showFrame();
         }
-        exp_now[4]=temp;
-        for(int i=0;i<5;i++){
-            setFace(catNameList[i],exp_now[i],1);
-        }
-        showFrame();
-    }
-    Serial.println("");
-    //data_analyse();    //至关重要的一步，也就是把读取回来的数据进行分步截取直接拿到我们想要的数据，我下一篇博文会讲如何自己写这个函数
+        Serial.println("");
     }
 }
 void setup() {
+    deserializeJson(id_matrix,id_matrix_txt);
     #ifdef __Enable_FastLED
         FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
     #endif
@@ -289,26 +427,6 @@ void setup() {
     //StartWifi();
     //StartBLE();
 }
-bool allwords[16][16*50+5];
-void AppendWord(String hexstr){
-	Serial.println(hexstr);
-	char tmpbuf[5];
-	memset(tmpbuf,0,sizeof(tmpbuf));
-    for(int i=0;i<hexstr.length();i+=4){
-		tmpbuf[0]=hexstr[i];tmpbuf[1]=hexstr[i+1];
-		int code1=strtol(tmpbuf,0,16);
-		tmpbuf[0]=hexstr[i+2];tmpbuf[1]=hexstr[i+3];
-		int code2=strtol(tmpbuf,0,16);
-        int tmp_code=(code1<<8)|code2;
-        for(int j=15;j>=0;j--){
-			if((tmp_code>>j)&1){
-                Serial.print('*');
-            }else Serial.print('.');
-        }
-		Serial.println();
-    }
-}
-
 
 void loop() {
     read_usart();
@@ -327,48 +445,7 @@ void loop() {
             buf[n]='\0';
             Serial.println("Received: ");
             Serial.println(buf[0]);
-            if(buf[0]=='A'){
-                String tmpadd=buf+1;
-                //Serial.println(tmpadd);
-                expTxt=expTxt+tmpadd;
-                //Serial.println(expTxt);
-            }else if(buf[0]=='B'){
-                deserializeJson(expJSON,expTxt);
-                Serial.println(expTxt.length());
-                //Serial.println(expTxt);
-                if((int)expJSON["mouth"][2][2]>0){
-                    for(int i=0;i<5;i++){
-                        setFace(catNameList[i],exp_now[i],1);
-                    }
-                    showFrame();
-                }
-            }else if(buf[0]=='C'){
-                expTxt="";
-            }else if(buf[0]=='e'){
-                for(int i=0;i<5;i++){
-                    setFace(catNameList[i],exp_now[i],0);
-                }
-                numStr_to_numArray(buf+1,exp_now,5);
-                Serial.println(buf);
-                for(int i=0;i<5;i++){
-                    setFace(catNameList[i],exp_now[i],1);
-                }
-                showFrame();
-            }else if(buf[0]=='U'){
-                //更新固件
-                Updating=true;
-                String get_bin_name=buf+2;
-                execOTA(get_bin_name);
-            }else if(buf[0]=='S'){
-                //设置亮度
-                String BrtnsStr=buf+2;
-                Brightness=atoi(BrtnsStr.c_str());
-                setLedBrightness(Brightness);
-                showFrame();
-            }else if(buf[0]=='T'){
-                String bufstr_tmp=buf+1;
-                AppendWord(bufstr_tmp);
-            }
+            handleMessage(buf);
             //if(buf[0]=='e') Serial.print("setting expressions");
             //deserializeJson(expJSON,buf);
         }

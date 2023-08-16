@@ -13,7 +13,7 @@
         </view>
     </view>
     <button style="font-size: small;margin-bottom: 10px;" bindtap="sendWifiValue">发送WiFi信息</button>
-    <button style="font-size: small;" bindtap="prepareInit">发送配置文件</button>
+    <button style="font-size: small;" bindtap="testInit">发送配置文件</button>
     <view class="row_box" style="width: 90%;">
         <text>亮度：{{brightness}}</text>
         <slider min="1" max="255" style="width: 70%;" value="{{brightness}}" bindchange="changeBrightness"></slider>
@@ -24,4 +24,11 @@
         </picker>
     </view>
     <button style="font-size: small;" bindtap="sendOTA">发送固件更新指令</button>
+    <view class="row_box" style="margin-top: 10px;">打印文字：
+        <input class="input" bindinput="setDispMessage" placeholder="输入文字" value="{{dispMessage}}"/>
+    </view>
+    <view class="row_box" style="margin-top: 10px;">滚动间隔(ms)：
+        <input class="input" bindinput="setSlideIntv" placeholder="输入毫秒数" value="{{slide_intv}}"/>
+    </view>
+    <button style="font-size: small;margin-top: 10px;" bindtap="sendDispMessage">发送文字</button>
 </view>
