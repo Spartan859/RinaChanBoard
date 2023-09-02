@@ -1,6 +1,6 @@
 // index.js
 // 获取应用实例
-import {ipa_out,sendInit,resetipa,sleep, sendUdpDefault} from '../../utils/util'
+import {ipa_out,sendInit,resetipa,sleep, sendUdpDefault,closeUdpSocket} from '../../utils/util'
 import {get_gbk_offset,read_char,read_char_extra} from '../../utils/getCharPic'
 console.log(ipa_out.ip);
 
@@ -12,7 +12,7 @@ const ExpMatrixInit=require('../../assets/expressions.js').ExpMatrixInit;
 
 const SERVICE_UUID='85253ceb-b0b7-4cc2-8e81-c22affa36a43';
 const WIFI_UUID='586f7454-dc36-442b-8a87-7e5368a5c42a';
-const MESSAGE_UUID='a1303310-cd55-4c46-8140-61b17f22bf01';
+var MESSAGE_UUID='a1303310-cd55-4c46-8140-61b17f22bf01';
 
 var IndexExport={};
 IndexExport.exp_matrix={};
@@ -178,6 +178,7 @@ Page({
                         title: '错误',
                         content: '网络异常！请重启小程序！',
                         complete: (res) => {
+                            closeUdpSocket();
                             wx.exitMiniProgram();
                         }
                     })
@@ -198,6 +199,7 @@ Page({
                         title: '错误',
                         content: '网络异常！请重启小程序！',
                         complete: (res) => {
+                            closeUdpSocket();
                             wx.exitMiniProgram();
                         }
                         })
@@ -234,7 +236,8 @@ Page({
               content: '如果要重新连接璃奈板，点击“确定”重启小程序',
               complete: (res) => {
                 if (res.confirm) {
-                  wx.exitMiniProgram();
+                    closeUdpSocket();
+                    wx.exitMiniProgram();
                 }
               }
             })
@@ -275,7 +278,7 @@ Page({
         this.setData({brightness: event.detail.value})
         sendUdpDefault('S '+event.detail.value);
     },
-    sendOTA(){
+    sendOTA: async function(){
         if(ipa_out.ip=='null'){
             wx.showModal({
               title: 'wifi未连接',
@@ -286,16 +289,23 @@ Page({
         wx.showModal({
           title: '警告',
           content: "确认更新固件至版本"+thispage.data.BinList[thispage.data.BinVersion]+'?',
-          complete: (res) => {
+          complete: async (res) => {
             if (res.confirm) {
-              sendUdpDefault('U '+thispage.data.BinList[thispage.data.BinVersion]+'.bin')
-              wx.showModal({
-                title: '发送成功',
-                content: '请等待更新完成后，重启小程序再次进行蓝牙连接',
-                complete: (res)=>{
-                    wx.exitMiniProgram()
+                wx.showModal({
+                    title: '发送成功',
+                    content: '请等待更新完成后，重启小程序再次进行蓝牙连接',
+                    complete: (res)=>{
+                        // closeUdpSocket();
+                        // wx.exitMiniProgram()
+                    }
+                })
+                while(1){
+                    sendUdpDefault('U '+thispage.data.BinList[thispage.data.BinVersion]+'.bin');
+                    console.log('U '+thispage.data.BinList[thispage.data.BinVersion]+'.bin');
+                    await sleep(100);
                 }
-              })
+              /*
+              */
             }
           }
         })
@@ -318,6 +328,18 @@ Page({
     },
     setSlideIntv(e){
         this.setData({slide_intv: parseInt(e.detail.value)});
+    },
+    exit_mnp(){
+        wx.showModal({
+          title: '退出小程序',
+          content: '是否确认退出小程序？',
+          complete: (res) => {
+            if (res.confirm) {
+                closeUdpSocket();
+                wx.exitMiniProgram();
+            }
+          }
+        })
     }
 })
 
@@ -349,6 +371,7 @@ wx.onBluetoothDeviceFound((res) => {
                             deviceId: deviceId,
                             serviceId: res.services[0].uuid,
                             success: (res)=>{
+                                MESSAGE_UUID=res.characteristics[1].uuid;
                                 wx.getBLEMTU({
                                     deviceId: deviceId,
                                     writeType: 'write',
@@ -363,6 +386,13 @@ wx.onBluetoothDeviceFound((res) => {
                                                 icon: 'none'
                                             })
                                             app.globalData.BLEmtu=res.mtu-4;
+                                            sendInit();
+                                        },
+                                        fail(res){
+                                            wx.showToast({
+                                                title: 'MTU: '+(app.globalData.BLEmtu+4),
+                                                icon: 'none'
+                                            })
                                             sendInit();
                                         }
                                       })

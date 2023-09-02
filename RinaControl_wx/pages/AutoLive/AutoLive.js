@@ -1,6 +1,7 @@
 // pages/ManualScreen/ManualScreen.js
 import {IndexExport} from '../index/index'
-import {sleep,sendUdpDefault,sendTxt} from '../../utils/util'
+import {sleep,sendUdpDefault,sendTxt, closeUdpSocket} from '../../utils/util'
+const EncryptUtils = require('../../utils/encrypt/encryptUtils')
 console.log(IndexExport.exp_matrix);
 
 var rec_res_table=[0];
@@ -105,7 +106,7 @@ Page({
                     tmpArray[i]=tmpstr.substring(0,tmpstr.length-4);
                     thispage.DownloadLive(tmpArray[i]);
                     console.log(tmpArray[i]);
-                    SongLinkList[i]='https://autosz.satintin.com/'+tmpArray[i];
+                    SongLinkList[i]='https://autosz.satintin.com/music_files/'+EncryptUtils.MD5(tmpArray[i])+'.mp3';
                 }
                 thispage.setData({SongList: tmpArray});
                 
@@ -120,8 +121,8 @@ Page({
     },
 
     startPlaying(){
-        this.audioCtx.src=SongLinkList[curSongid]
         this.audioCtx.title=this.data.SongList[curSongid];
+        this.audioCtx.src=SongLinkList[curSongid]
         var SongSel=this.data.SongList[curSongid];
         //console.log(ExpContent[SongSel]['FrameList'])
         //this.audioCtx.play();
@@ -261,9 +262,12 @@ Page({
     })
   },
   ChangeSong(event){
-      curSongid=event.detail.value
-    this.audioCtx.src=SongLinkList[curSongid];
+    curSongid=event.detail.value;
     this.audioCtx.title=this.data.SongList[curSongid];
+    this.audioCtx.src=SongLinkList[curSongid];
+    console.log(this.audioCtx);
+    console.log(SongLinkList);
+    console.log(this.audioCtx.title);
     console.log(this.audioCtx.src);
 
     lastFrame=-1;
@@ -317,6 +321,7 @@ Page({
         content: '重启即可下载最新歌曲文件！是否重启？',
         complete: (res) => {
           if (res.confirm) {
+            closeUdpSocket();
             wx.exitMiniProgram();
           }
         }

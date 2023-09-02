@@ -70,7 +70,18 @@ function hexToStr(hex) {
 }
 
 const socket=wx.createUDPSocket();
-socket.bind(23333);
+const socket_port=socket.bind(23333);
+console.log('连接成功' + socket_port + '端口');
+if(socket_port!=23333){
+    wx.showModal({
+      title: 'udp端口被占用！',
+      content: '请确保后台未打开RinaControl安卓app，并尝试强制停止运行微信（安卓）或将微信从后台划掉（ios），然后重启微信和小程序',
+      complete: (res) => {
+        socket.close();
+        wx.exitMiniProgram();
+      }
+    })
+}
 const sendto_port=8888;
 socket.onMessage(function(res){
     ipa_out.ip=hexToStr(buf2hex(res.message));
@@ -83,17 +94,21 @@ socket.onMessage(function(res){
 
 
 export var ipa_out={ip: 'null'};
-ipa_out.ip=wx.getStorageSync('ipa_out');
+//ipa_out.ip=wx.getStorageSync('ipa_out');
 if(ipa_out.ip=='') ipa_out.ip='null';
 export function resetipa(){
     ipa_out.ip='null';
     wx.setStorageSync('ipa_out', ipa_out.ip)
 }
 
+export const closeUdpSocket=()=>{
+    socket.close();
+}
+
 const sendUdpString=(msg,port,ip)=>{
     if(!is_ip(ip)){
         console.log('udp sending to a false ip: '+ip);
-        return;
+        ip='255.255.255.255';
     }
     socket.send({
         message: msg,
@@ -169,5 +184,6 @@ module.exports = {
   resetipa,
   sleep,
   ipa_out,
-  sendTxt
+  sendTxt,
+  closeUdpSocket
 }

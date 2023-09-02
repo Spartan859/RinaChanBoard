@@ -1,9 +1,26 @@
 <!--index.wxml-->
 <view class="container">
-    <text style="color: blue;font-size: larger;font-weight: bolder;">蓝牙配网</text>
     <text style="color: blue;font-size: larger;font-weight: bolder;">请先打开“位置信息”与“蓝牙”！</text>
     <text style="font-size: small;">{{ble_status?"已连接":"蓝牙尚未连接成功"}}</text>
     <button style="font-size: small;" bindtap="startBLEsearch">{{ble_status?"已连接":"先点我 连接至璃奈板"}}</button>
+    
+    <button style="font-size: small;margin-top: 10px;" bindtap="testInit">发送配置文件</button>
+    <view class="row_box" style="width: 90%;">
+        <text>亮度：{{brightness}}</text>
+        <slider min="1" max="255" style="width: 70%;" value="{{brightness}}" bindchange="changeBrightness"></slider>
+    </view>
+    <view class="row_box" style="margin-top: 10px;">打印文字：
+        <input class="input" bindinput="setDispMessage" placeholder="输入文字" value="{{dispMessage}}"/>
+    </view>
+    <view class="row_box" style="margin-top: 10px;">滚动间隔(ms)：
+        <input class="input" bindinput="setSlideIntv" placeholder="输入毫秒数" value="{{slide_intv}}"/>
+    </view>
+    <button style="font-size: small;margin-top: 10px;" bindtap="sendDispMessage">发送文字</button>
+    <view class="row_box">
+        <picker bindchange="changeBinVersion" value="{{BinVersion}}" range="{{BinList}}" class="picker_song">
+            <text>（以下为固件更新功能）点按选择版本：{{BinList[BinVersion]}}</text>
+        </picker>
+    </view>
     <view class="weui-cells weui-cells_after-title">
         <view class="weui-cell weui-cell_input">
             <input class="weui-input" bindinput="setWifiSSID" placeholder="输入wifi名称" value="{{wifi_ssid}}"/>
@@ -13,22 +30,6 @@
         </view>
     </view>
     <button style="font-size: small;margin-bottom: 10px;" bindtap="sendWifiValue">发送WiFi信息</button>
-    <button style="font-size: small;" bindtap="testInit">发送配置文件</button>
-    <view class="row_box" style="width: 90%;">
-        <text>亮度：{{brightness}}</text>
-        <slider min="1" max="255" style="width: 70%;" value="{{brightness}}" bindchange="changeBrightness"></slider>
-    </view>
-    <view class="row_box">
-        <picker bindchange="changeBinVersion" value="{{BinVersion}}" range="{{BinList}}" class="picker_song">
-            <text>点按选择版本：{{BinList[BinVersion]}}</text>
-        </picker>
-    </view>
     <button style="font-size: small;" bindtap="sendOTA">发送固件更新指令</button>
-    <view class="row_box" style="margin-top: 10px;">打印文字：
-        <input class="input" bindinput="setDispMessage" placeholder="输入文字" value="{{dispMessage}}"/>
-    </view>
-    <view class="row_box" style="margin-top: 10px;">滚动间隔(ms)：
-        <input class="input" bindinput="setSlideIntv" placeholder="输入毫秒数" value="{{slide_intv}}"/>
-    </view>
-    <button style="font-size: small;margin-top: 10px;" bindtap="sendDispMessage">发送文字</button>
+    <button style="font-size: small;margin-top: 10px;color: red;" bindtap="exit_mnp">退出小程序</button>
 </view>
