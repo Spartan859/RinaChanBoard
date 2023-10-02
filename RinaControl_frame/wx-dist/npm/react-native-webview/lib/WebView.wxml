@@ -1,1 +1,0 @@
-<wxs src="../../../commonwxs.wxs" module="_t" /> <template name="b"> <block style="{{_t.s(undefinedstyle)}}"> <view style="{{_t.s(c_style)}}" class="text"> React Native WebView does not support this platform. </view> </block> </template> <template wx:if="{{(_r && _r.tempName)}}" is="{{_r.tempName}}" data="{{..._r}}"/> 

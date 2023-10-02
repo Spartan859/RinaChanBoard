@@ -1,8 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "mask": "../Mask/index",
-    "button": "../Button/index",
-    "am-icon": "../Icon/index"
-  }
-}

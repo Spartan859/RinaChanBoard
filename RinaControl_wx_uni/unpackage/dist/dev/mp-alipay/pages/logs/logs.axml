@@ -1,1 +1,0 @@
-<view class="container log-list"><block a:for="{{logs}}" a:for-item="log" a:for-index="index" a:key="index"><text class="log-item">{{index+1+". "+log.date}}</text></block></view>

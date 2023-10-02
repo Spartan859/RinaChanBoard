@@ -1,7 +1,0 @@
-<web-view 
-    src="{{source.uri}}" 
-    bindmessage="onMyMessage" 
-    bindload="onMyLoad" 
-    binderror="onMyError"
->
-</web-view>

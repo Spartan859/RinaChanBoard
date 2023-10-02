@@ -1,1 +1,0 @@
-<wxs src="../commonwxs.wxs" module="_t" /> <template name="b"> <WebView diuu="{{b_}}" wx:if="{{b_style !== false}}" generic:_g="_e" style="{{_t.s(b_style)}}" /> </template> <template wx:if="{{(_r && _r.tempName)}}" is="{{_r.tempName}}" data="{{..._r}}"/> 

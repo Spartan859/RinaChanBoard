@@ -1,5 +1,0 @@
-<switch
-        color="{{tintColor}}"
-        checked="{{value}}"
-        bindchange="onValueChange"
-/>
