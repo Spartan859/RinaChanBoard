@@ -77,7 +77,8 @@ class MyServerCallbacks : public BLEServerCallbacks
 
   void onDisconnect(BLEServer *pServer)
   {
-    Serial.println("BLE Disconnected");
+    Serial.println("BLE Disconnected,re-advertising");
+    pServer->getAdvertising()->start();
   }
 };
 
