@@ -24,6 +24,9 @@
 #include <WiFiClient.h>
 #include <esp_bt_main.h>
 #include <freertos/task.h>
+#include "SDCardManager.h"
+
+
 #define SERVICE_UUID "85253ceb-b0b7-4cc2-8e81-c22affa36a43"
 #define WIFI_CHARACTERISTIC_UUID "586f7454-dc36-442b-8a87-7e5368a5c42a"
 #define MESSAGE_CHARACTERISTIC_UUID "a1303310-cd55-4c46-8140-61b17f22bf01"
@@ -32,6 +35,7 @@ unsigned long previousMillis = 0;
 unsigned long interval = 3000;
 
 //#define LED_PIN 12
+SDCardManager sdCardManager;
 
 const int versionArray[]={0,1,1};
 
@@ -388,6 +392,8 @@ void read_usart(){
     }
 }
 void setup() {
+    delay(5000);
+    sdCardManager.initialize();
     deserializeJson(id_matrix,id_matrix_txt);
     #ifdef __Enable_FastLED
         FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
