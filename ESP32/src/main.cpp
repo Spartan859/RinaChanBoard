@@ -392,8 +392,8 @@ void read_usart(){
     }
 }
 void setup() {
-    delay(5000);
-    sdCardManager.initialize();
+    // delay(5000);
+    // sdCardManager.initialize();
     deserializeJson(id_matrix,id_matrix_txt);
     #ifdef __Enable_FastLED
         FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
@@ -424,7 +424,7 @@ void setup() {
     Serial.println();
     Serial.println();
 
-    Serial1.begin(9600,SERIAL_8E1,GPIO_NUM_17,GPIO_NUM_18);
+    Serial1.begin(9600,SERIAL_8E1,GPIO_NUM_44,GPIO_NUM_43);
 
     //SerialBT.end();
     }
